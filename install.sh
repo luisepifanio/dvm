@@ -38,7 +38,7 @@ install_dvm_from_git() {
     echo "=> dvm is already installed in $DVM_DIR, trying to update using git"
     printf "\r=> "
     cd "$DVM_DIR" && (command git fetch 2> /dev/null || {
-      echo >&2 "Failed to update nvm, run 'git fetch' in $DVM_DIR yourself." && exit 1
+      echo >&2 "Failed to update dvm, run 'git fetch' in $DVM_DIR yourself." && exit 1
     })
   else
     # Cloning to $DVM_DIR
@@ -63,7 +63,7 @@ dvm_do_install(){
   install_dvm_from_git
 
   local DVM_PROFILE
-  DVM_PROFILE=$(nvm_detect_profile)
+  DVM_PROFILE=$(dvm_detect_profile)
 
   SOURCE_STR="\nexport DVM_DIR=\"$DVM_DIR\"\n[ -s \"\$DVM_DIR/dvm.sh\" ] && . \"\$DVM_DIR/nvm.sh\"  # This loads nvm"
 
