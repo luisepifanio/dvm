@@ -63,7 +63,7 @@ dvm_do_install(){
   install_dvm_from_git
 
   local DVM_PROFILE
-  DVM_PROFILE=$(dvm_detect_profile)
+  DVM_PROFILE=$(nvm_detect_profile)
 
   SOURCE_STR="\nexport DVM_DIR=\"$DVM_DIR\"\n[ -s \"\$DVM_DIR/dvm.sh\" ] && . \"\$DVM_DIR/nvm.sh\"  # This loads nvm"
 
@@ -76,13 +76,15 @@ dvm_do_install(){
     printf "$SOURCE_STR"
     echo
   else
-    if ! grep -qc 'nvm.sh' "$DVM_PROFILE"; then
+    if ! grep -qc 'dvm.sh' "$DVM_PROFILE"; then
       echo "=> Appending source string to $DVM_PROFILE"
       printf "$SOURCE_STR\n" >> "$DVM_PROFILE"
     else
       echo "=> Source string already in $DVM_PROFILE"
     fi
   fi
+
+  echo "Install finished..."
 
 }
 
