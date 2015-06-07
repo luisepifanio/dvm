@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+echo "Here is exec file......TBC"
+DIR="$(command cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source "$DIR/nvm.sh"
+
+exec $@
