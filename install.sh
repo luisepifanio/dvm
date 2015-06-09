@@ -13,7 +13,7 @@ if [ -z "$DVM_DIR" ]; then
 fi
 
 dvm_latest_version() {
-  echo "0.0.1"
+  echo "0.0.2"
 }
 
 #
