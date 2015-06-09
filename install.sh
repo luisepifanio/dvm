@@ -119,10 +119,10 @@ install_dvm_as_script() {
 dvm_detect_profile() {
   if [ -f "$PROFILE" ]; then
     echo "$PROFILE"
-  elif [ -f "$HOME/.bashrc" ]; then
-    echo "$HOME/.bashrc"
   elif [ -f "$HOME/.bash_profile" ]; then
     echo "$HOME/.bash_profile"
+  elif [ -f "$HOME/.bashrc" ]; then
+    echo "$HOME/.bashrc"
   elif [ -f "$HOME/.zshrc" ]; then
     echo "$HOME/.zshrc"
   elif [ -f "$HOME/.profile" ]; then
