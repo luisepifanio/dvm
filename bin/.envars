@@ -2,14 +2,14 @@
 echo "Running $DVM_DIR/.envars"
 # setup environment variables/path
 
-if [ ! -f "$DVM_DIR/bin/.plataform" ]; then
+if [ ! -f "$HOME/bin/.plataform" ]; then
     echo "No plataform specific file found..."
-    echo "Creating at $DVM_DIR/bin/.plataform"
-    cat >"$DVM_DIR/bin/.plataform" <<EOL
+    echo "Creating at $HOME/bin/.plataform"
+    mkdir -p "$HOME/bin"
+
+    cat >"$HOME/bin/.plataform" <<EOL
 #!/usr/bin/env sh
 echo "Running \$HOME/bin/.plataform"
-
-mkdir -p "\$HOME/bin"
 
 install_jdk_switcher () {
     if [ ! -f "\$HOME/bin/jdk_switcher.sh" ]; then
