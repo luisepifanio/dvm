@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -e
 
@@ -31,7 +31,7 @@ dvm_source() {
     DVM_SOURCE_URL="https://raw.githubusercontent.com/luisepifanio/dvm/$(dvm_latest_version)/dvm-exec"
   elif [ -z "$DVM_SOURCE_URL" ]; then
     if [ "_$DVM_METHOD" = "_script" ]; then
-      DVM_SOURCE_URL="https://raw.githubusercontent.com/luisepifanio/dvm/$(dvm_latest_version)/vm.sh"
+      DVM_SOURCE_URL="https://raw.githubusercontent.com/luisepifanio/dvm/$(dvm_latest_version)/dvm.sh"
     elif [ "_$DVM_METHOD" = "_git" ] || [ -z "$DVM_METHOD" ]; then
       DVM_SOURCE_URL="https://github.com/luisepifanio/dvm.git"
     else
@@ -202,10 +202,10 @@ dvm_do_install() {
     install_dvm_as_script
   fi
 
-  echo
-
   local DVM_PROFILE
   DVM_PROFILE=$(dvm_detect_profile)
+
+  echo "=> Profile detected on $DVM_PROFILE"
 
   SOURCE_STR="\nexport DVM_DIR=\"$DVM_DIR\"\n[ -s \"\$DVM_DIR/dvm.sh\" ] && . \"\$DVM_DIR/dvm.sh\"  # This loads dvm"
 

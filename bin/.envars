@@ -1,0 +1,125 @@
+#!/usr/bin/env sh
+echo "Running $DVM_DIR/.envars"
+# setup environment variables/path
+
+if [ ! -f "$DVM_DIR/bin/.plataform" ]; then
+    echo "No plataform specific file found..."
+    echo "Creating at $DVM_DIR/bin/.plataform"
+    cat >"$DVM_DIR/bin/.plataform" <<EOL
+#!/usr/bin/env sh
+echo "Running \$HOME/bin/.plataform"
+
+mkdir -p "\$HOME/bin"
+
+install_jdk_switcher () {
+    if [ ! -f "\$HOME/bin/jdk_switcher.sh" ]; then
+        wget -P "\$HOME/bin" "https://raw.githubusercontent.com/michaelklishin/jdk_switcher/master/jdk_switcher.sh"
+        chmod +x "\$HOME/bin/jdk_switcher.sh"
+    fi
+
+    if [ -f "\$HOME/bin/jdk_switcher.sh" ]; then
+        echo "setting up jdk_switcher"
+        . "\$HOME/bin/jdk_switcher.sh"
+    fi
+}
+
+install_jdk_switcher_mac () {
+    if [ ! -f "\$HOME/bin/jdk_switcher_mac.sh" ]; then
+        wget -P "\$HOME/bin" "https://raw.githubusercontent.com/luisepifanio/jdk_switcher_mac/master/jdk_switcher_mac.sh"
+        chmod +x "\$HOME/bin/jdk_switcher_mac.sh"
+    fi
+
+    if [ -f "\$HOME/bin/jdk_switcher_mac.sh" ]; then
+        . "\$HOME/bin/jdk_switcher_mac.sh"
+    fi
+}
+
+install_nvm () {
+    if [ -d "\$NVM_DIR" ] || [ -d "\$HOME/.nvm" ]; then
+        echo "=> nvm is already installed "
+    else
+        echo "=> INSTALLING NVM"
+        #curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.25.3/install.sh | bash
+        wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.3/install.sh | bash
+    fi
+}
+
+install_gvm () {
+    if [ -d "\$GVM_DIR" ] || [ -d "\$HOME/.gvm" ]; then
+        echo "=> gvm is already installed "
+    else
+        echo "=> INSTALLING GVM"
+        curl -s get.gvmtool.net | bash
+    fi
+
+}
+
+if [ "\$(uname)" = "Darwin" ]; then
+    # Do something under Mac OS X platform
+    export JAVA_HOME="\$(/usr/libexec/java_home -v1.7)"
+    install_gvm
+    install_nvm
+    install_jdk_switcher_mac
+    export CDARGS_SCR="/usr/local/etc/bash_completion.d/cdargs-bash.sh"
+    export PYTHONPATH=/usr/local/lib/python2.7/site-packages:\$PYTHONPATH
+
+elif [ "\$(expr substr \$(uname -s) 1 5)" = "Linux" ]; then
+    # Do something under Linux platform
+    export JAVA_HOME="/usr/lib/jvm/java-7-oracle"
+    install_gvm
+    install_nvm
+    install_jdk_switcher
+
+elif [ "\$(expr substr \$(uname -s) 1 10)" = "MINGW32_NT" ]; then
+    # Do something under Windows NT platform
+    export JAVA_HOME="C:\Program Files\Java\jdk1.7.0_71"
+else
+    echo "plataform not detected"
+fi
+
+EOL
+echo "Created $HOME/bin/.plataform"
+fi
+
+# include plataform specific configuration
+# at "$HOME/bin/.plataform" if it exists
+# Please do not forget to setup $DEV_TOOLS in .platform
+if [ -f "$HOME/bin/.plataform" ]; then
+   . "$HOME/bin/.plataform"
+fi
+
+if [ -z "$DEVTOOLS" ]; then
+    echo "DEVTOOLS must be set in .plataform, default will be $HOME/DEV_TOOLS"
+    export DEVTOOLS="$HOME/DEV_TOOLS"
+fi
+
+###############################################################################
+#                       HERE YOU CAN TWEAK YOUR VARS                          #
+###############################################################################
+
+export ANT_HOME="$DEVTOOLS/ANT_HOME"
+export MAVEN_HOME="$DEVTOOLS/MAVEN_HOME"
+export M2_HOME="$MAVEN_HOME"
+export JMETER_HOME="$DEVTOOLS/JMETER_HOME"
+export P4V_HOME="$HOME/DEV_TOOLS/P4V_HOME"
+export JAVA_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
+export GRAILS_OPTS="-Xmx5G -Xms5G -XX:MaxPermSize=5G -XX:+UseCodeCacheFlushing -XX:MaxInlineLevel=15 -noverify"
+export GRAILS_OPTS="$GRAILS_OPTS -Dstringchararrayaccessor.disabled=true"
+export GRAILS_OPTS="$GRAILS_OPTS -Dsun.net.http.allowRestrictedHeaders=true"
+export GRAILS_OPTS="$GRAILS_OPTS -Dfile.encoding=UTF-8"
+
+#PROXY RELATED
+export HTTP_PROXY_HOST=""
+export HTTP_PROXY_PORT=""
+export HTTPS_PROXY_HOST=""
+export HTTPS_PROXY_PORT=""
+
+#OTHERS VARS
+
+
+#OTHER VARS
+#export MAVEN_OPTS=-javaagent:$DEVTOOLS/JREBEL_HOME/jrebel.jar
+#Git SSH
+export GIT_SSH=/usr/bin/ssh
+#Default command line editor
+export EDITOR=vim

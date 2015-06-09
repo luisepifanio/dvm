@@ -1,0 +1,39 @@
+#!/usr/bin/env sh
+echo "Running $DVM_DIR/bin/.pathconf"
+
+cleanpath()
+{
+  if [ -n "$PATH" ]; then
+    OLD_PATH=$PATH:; NEO_PATH=
+    while [ -n "$OLD_PATH" ]; do
+      x=${OLD_PATH%%:*}       # the first remaining entry
+      case $NEO_PATH: in
+        *:"$x":*) ;;         # already there
+        *)  if [ -n "$NEO_PATH" ]; then
+              NEO_PATH=$NEO_PATH:$x
+            else
+              NEO_PATH=$x
+            fi;; # not there yet
+      esac
+      OLD_PATH=${OLD_PATH#*:}
+    done
+    PATH="$NEO_PATH"
+    unset OLD_PATH x
+  fi
+}
+
+#Path configuration: directory based
+if [ -f "$DVM_DIR/bin/.paths" ]; then
+    while read line
+    do
+        pathvar=$( eval echo $line )
+        if [ -z "${PATH##*$pathvar*}" ] ;then
+          echo "$pathvar IS ALREADY on path"
+        else
+          echo "ADDING $pathvar to path"
+          PATH="$pathvar:$PATH"
+        fi
+    done < $DVM_DIR/bin/.paths
+fi
+
+cleanpath

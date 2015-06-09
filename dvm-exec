@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-echo "Here is exec file......TBC"
+echo " => executing DVM..."
 DIR="$(command cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$DIR/nvm.sh"
+echo "working on $DIR"
+
+source "$DIR/dvm.sh"
 
 exec $@
