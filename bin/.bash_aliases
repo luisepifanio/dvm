@@ -98,7 +98,7 @@ reloadEnv () {
         source "$HOME/.zshrc"
     elif [ -f "$HOME/.profile" ]; then
         source "$HOME/.profile"
-    elif
+    else
         echo "No initializer found"
     fi
 }
