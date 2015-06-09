@@ -105,7 +105,7 @@ git_branch () {
 # GIT dirty status
 ##
 git_dirty () {
-  if [[ "$(git status --porcelain 2>/dev/null)" = *\?\?* ]]; then
+  if [ ! -z "$(git status --porcelain 2>/dev/null | egrep '.*M|\?\?')" ]; then
       echo -e "${BRIGHT_RED}"
   else
       echo -e "${BRIGHT_GREEN}"
