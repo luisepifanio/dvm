@@ -3,7 +3,7 @@
 ## Installation
 
 
-Note: `dvm` works only when bash and curl or wget is available 
+Note: `dvm` works only when bash and curl or wget are available 
 
 ### Install script
 
