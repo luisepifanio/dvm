@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-echo "Running $HOME/.scmbashprompt"
+echo "Running $DVM_DIR/bin/.scmbashprompt"
 #
 # File: .scmbashprompt
 # Author: Luis G. Epifanio
