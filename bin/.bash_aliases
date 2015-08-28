@@ -132,27 +132,6 @@ disable_proxy () {
   export http_proxy=""
 
 }
-map_ssh_server()
-{
-    re='^[0-9]+$'
-
-    if ! [[ $1 =~ $re ]] ; then
-       echo "el puerto local no es un nro: '$1'" >&2; return 0
-    fi
-    if [ -z "$2" ]; then
-        echo "'$2' no es un host valido" >&2; return 0
-    fi
-    if ! [[ $3 =~ $re ]] ; then
-       echo "el puerto remoto no es un nro: '$3'" >&2; return 0
-    fi
-    if [ -z "$MELI_USER" ]; then
-        echo "Configura la variable MELI_USER ='$MELI_USER'" >&2; return 0
-    fi
-    if [ -z "$MELI_HOST" ]; then
-        MELI_HOST="10.100.41.3"
-    fi
-    ssh -L $1:$2:$3 $MELI_USER@$MELI_HOST
-}
 
 chownThisFolder(){
     local folder="$1"
@@ -162,64 +141,48 @@ chownThisFolder(){
     sudo chown -R $USER:`id -g -n $USER` "$folder"
 }
 
-grails_opts5g()
-{
+grails_opts(){
+    if [ -z "$1" ]; then
+        echo "'$1' is not a valid config" >&2; return 0
+    fi
+
     export GRAILS_OPTS=""
-    export GRAILS_OPTS="-Xmx5G -Xms5G -XX:MaxPermSize=5G -XX:PermSize=5G -server -XX:+UseParallelGC -XX:+UseCodeCacheFlushing -XX:MaxInlineLevel=15 -noverify"
-    export GRAILS_OPTS="$GRAILS_OPTS -Djava.net.preferIPv4Stack=true -Dsun.reflect.inflationThreshold=100000"
+    export GRAILS_OPTS="-Xmx$1 -XX:MaxPermSize=$1 -XX:PermSize=$1"
+    export GRAILS_OPTS="$GRAILS_OPTS -server -noverify -XX:+UseParallelGC -XX:+UseCodeCacheFlushing -XX:MaxInlineLevel=15"
+    export GRAILS_OPTS="$GRAILS_OPTS -Xshare:off -XX:+EliminateLocks -XX:+UseBiasedLocking -XX:MaxJavaStackTraceDepth=100"
+    export GRAILS_OPTS="$GRAILS_OPTS -Djava.net.preferIPv4Stack=true"
+    export GRAILS_OPTS="$GRAILS_OPTS -Dsun.reflect.inflationThreshold=100000"
     #export GRAILS_OPTS="$GRAILS_OPTS -Dstringchararrayaccessor.disabled=true"
     export GRAILS_OPTS="$GRAILS_OPTS -Dsun.net.http.allowRestrictedHeaders=true"
     export GRAILS_OPTS="$GRAILS_OPTS -Dfile.encoding=UTF-8"
+    export GRAILS_OPTS="$GRAILS_OPTS -Djava.awt.headless=true"
 
     echo "Set up for GRAILS_OPTS=$GRAILS_OPTS"
 }
 
-grails_opts8g()
-{
+grails_opts_clean(){
     export GRAILS_OPTS=""
-    export GRAILS_OPTS="-Xmx8G -Xms8G -XX:MaxPermSize=8G -XX:PermSize=8G -server -XX:+UseParallelGC -XX:+UseCodeCacheFlushing -XX:MaxInlineLevel=15 -noverify"
-    export GRAILS_OPTS="$GRAILS_OPTS -Djava.net.preferIPv4Stack=true -Dsun.reflect.inflationThreshold=100000"
-    export GRAILS_OPTS="$GRAILS_OPTS -Dsun.net.http.allowRestrictedHeaders=true"
-    export GRAILS_OPTS="$GRAILS_OPTS -Dfile.encoding=UTF-8"
-
     echo "Set up for GRAILS_OPTS=$GRAILS_OPTS"
 }
 
-grails_opts4g()
-{
-    export GRAILS_OPTS=""
-    export GRAILS_OPTS="-Xmx4G -Xms4G -XX:MaxPermSize=4G -XX:PermSize=4G -server -XX:+UseParallelGC -XX:+UseCodeCacheFlushing -XX:MaxInlineLevel=15 -noverify"
-    export GRAILS_OPTS="$GRAILS_OPTS -Djava.net.preferIPv4Stack=true -Dsun.reflect.inflationThreshold=100000"
-    export GRAILS_OPTS="$GRAILS_OPTS -Dsun.net.http.allowRestrictedHeaders=true"
-    export GRAILS_OPTS="$GRAILS_OPTS -Dfile.encoding=UTF-8"
-
-    echo "Set up for GRAILS_OPTS=$GRAILS_OPTS"
+java_opts_clean(){
+    export JAVA_OPTS=""
+    echo "Set up for JAVA_OPTS=$JAVA_OPTS"
 }
 
-grails_opts512M()
-{
-    #-Djava.awt.headless=true#sthash.YDdxITbz.dpuf
-    export GRAILS_OPTS=""
-    export GRAILS_OPTS="-Xmx512M -Xms512M -XX:MaxPermSize=512M -XX:PermSize=512M -server -XX:+UseParallelGC -XX:+UseCodeCacheFlushing -XX:MaxInlineLevel=15 -noverify"
-    export GRAILS_OPTS="$GRAILS_OPTS -Djava.net.preferIPv4Stack=true -Dsun.reflect.inflationThreshold=100000"
-    export GRAILS_OPTS="$GRAILS_OPTS -Dsun.net.http.allowRestrictedHeaders=true"
-    export GRAILS_OPTS="$GRAILS_OPTS -Dfile.encoding=UTF-8"
-
-    echo "Set up for GRAILS_OPTS=$GRAILS_OPTS"
+java_opts_ivy_logger(){
+    export JAVA_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
+    echo "Set up for JAVA_OPTS=$JAVA_OPTS"
 }
 
-grails_opts512M()
+grails_opts_test()
 {
     export GRAILS_OPTS=""
-    export GRAILS_OPTS="-Xmx512M -Xms512M -XX:MaxPermSize=512M -XX:PermSize=512M -server -XX:+UseParallelGC -XX:+UseCodeCacheFlushing -XX:MaxInlineLevel=15 -noverify"
-    export GRAILS_OPTS="$GRAILS_OPTS -Djava.net.preferIPv4Stack=true -Dsun.reflect.inflationThreshold=100000"
-    export GRAILS_OPTS="$GRAILS_OPTS -Dsun.net.http.allowRestrictedHeaders=true"
-    export GRAILS_OPTS="$GRAILS_OPTS -Dfile.encoding=UTF-8"
-
+    export GRAILS_OPTS="$GRAILS_OPTS -XX:MaxPermSize=3G -Xmx3G -server"
     echo "Set up for GRAILS_OPTS=$GRAILS_OPTS"
 }
 
 check_groovy_proxy()
 {
-    groovy -Dhttp.proxyHost=172.16.0.89 -Dhttp.proxyPort=80 -Dhttps.proxyHost=172.16.0.89 -Dhttps.proxyPort=80  -e 'try{ println "http://ifconfig.me/ip".toURL().text }catch(Exception e){ println "CHECK NETWORK|PROXY!" }'
+    groovy -Dhttp.proxyHost="$HTTP_PROXY_HOST" -Dhttp.proxyPort="$HTTP_PROXY_PORT" -Dhttps.proxyHost="$HTTPS_PROXY_HOST" -Dhttps.proxyPort="$HTTPS_PROXY_PORT"  -e 'try{ println "http://ifconfig.me/ip".toURL().text }catch(Exception e){ println "CHECK NETWORK|PROXY!" }'
 }
