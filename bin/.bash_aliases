@@ -83,10 +83,33 @@ serverOn () {
    #^-?[0-9]+([.][0-9]+)?$
     re='^[0-9]+$'
     if ! [[ $1 =~ $re ]] ; then
-       echo "error specified port is NOT a number" >&2; exit 1
+       echo "error specified port is NOT a number" >&2;
+       return 1
     fi
+
+    if [ $1 -lt 1024 ]; then
+        echo "You cannot run server on port blow 1024" >&2;
+       return 1
+    fi
+
     python -m SimpleHTTPServer $1
 }
+
+pidOnPort(){
+    re='^[0-9]+$'
+    if ! [[ $1 =~ $re ]] ; then
+        echo "error specified port is NOT a number" >&2;
+        return 1
+    fi
+
+    protocols="tcp udp"
+
+    for proto in $protocols
+    do
+     echo "$( lsof -i $proto:$1 )"
+    done
+}
+
 reloadEnv () {
     if [ -f "$PROFILE" ]; then
         source "$PROFILE"
