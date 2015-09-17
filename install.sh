@@ -13,7 +13,7 @@ if [ -z "$DVM_DIR" ]; then
 fi
 
 dvm_latest_version() {
-  echo "0.0.10"
+  echo "0.0.11"
 }
 
 #
@@ -125,8 +125,6 @@ dvm_detect_profile() {
     echo "$HOME/.bashrc"
   elif [ -f "$HOME/.zshrc" ]; then
     echo "$HOME/.zshrc"
-  elif [ -f "$HOME/.profile" ]; then
-    echo "$HOME/.profile"
   fi
 }
 
