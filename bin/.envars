@@ -39,17 +39,17 @@ install_nvm () {
         echo "=> nvm is already installed "
     else
         echo "=> INSTALLING NVM"
-        #curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.25.3/install.sh | bash
-        wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.3/install.sh | bash
+        #curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash
+        wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash
     fi
 }
 
 install_gvm () {
-    if [ -d "\$GVM_DIR" ] || [ -d "\$HOME/.gvm" ]; then
+    if [ -d "\$SDKMAN_DIR" ] || [ -d "\$HOME/.sdkman" ]; then
         echo "=> gvm is already installed "
     else
         echo "=> INSTALLING GVM"
-        curl -s get.gvmtool.net | bash
+        curl -s http://get.gvm.io | bash
     fi
 
 }
