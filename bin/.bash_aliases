@@ -209,3 +209,14 @@ check_groovy_proxy()
 {
     groovy -Dhttp.proxyHost="$HTTP_PROXY_HOST" -Dhttp.proxyPort="$HTTP_PROXY_PORT" -Dhttps.proxyHost="$HTTPS_PROXY_HOST" -Dhttps.proxyPort="$HTTPS_PROXY_PORT"  -e 'try{ println "http://ifconfig.me/ip".toURL().text }catch(Exception e){ println "CHECK NETWORK|PROXY!" }'
 }
+
+lls()
+{
+    local folder="$1"
+    if [ -z "$folder" ]; then
+      folder="*"
+    fi
+
+    echo "$( stat -c '%A (%a) %8s %.19y %n' $folder )"
+}
+
