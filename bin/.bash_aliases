@@ -49,6 +49,11 @@ alias shutdown='sudo /sbin/shutdown'
 #################
 alias gcleanbuild='grails clean  && grails test-app :unit --non-interactive'
 alias prettyjson='python -m json.tool'
+#####################
+### SCM FUNCTIONS ###
+#####################
+alias glg='git log --date-order --all --graph --format="%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
+alias glg2='git log --date-order --all --graph --name-status --format="%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
 #################
 ### FUNCTIONS ###
 #################
