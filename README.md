@@ -9,11 +9,11 @@ Note: `dvm` works only when bash and curl or wget are available
 
 To install you could use the [install script][2] using cURL:
 
-    curl -o- https://raw.githubusercontent.com/luisepifanio/dvm/0.0.12/install.sh | bash
+    curl -o- https://raw.githubusercontent.com/luisepifanio/dvm/0.0.13/install.sh | bash
 
 or Wget:
 
-    wget -qO- https://raw.githubusercontent.com/luisepifanio/dvm/0.0.12/install.sh | bash
+    wget -qO- https://raw.githubusercontent.com/luisepifanio/dvm/0.0.13/install.sh | bash
 
 <sub>
 The script clones the dvm repository to `~/.dvm` and adds the source line to your profile (`~/.bash_profile`, `~/.zshrc` or `~/.profile`).</sub>
@@ -35,14 +35,14 @@ Often I also put in a line to use a specific version of node.
 
   For now just configures your development environment to quick start, but it is not production ready
   
-  curl -o- https://raw.githubusercontent.com/luisepifanio/dvm/0.0.5/install.sh | bash
+  curl -o- https://raw.githubusercontent.com/luisepifanio/dvm/0.0.13/install.sh | bash
  
 ## License
 
 nvm is released under the MIT license.
 
 
-Copyright (C) 2010-2014 Tim Caswell
+Copyright (C) 2010-2014 Luis Epifanio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
