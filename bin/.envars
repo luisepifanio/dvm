@@ -49,7 +49,7 @@ install_gvm () {
         echo "=> gvm is already installed "
     else
         echo "=> INSTALLING GVM"
-        curl -s http://get.gvm.io | bash
+        curl -s http://get.sdkman.io | bash
     fi
 
 }
