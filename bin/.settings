@@ -1,33 +1,22 @@
 #!/usr/bin/env sh
-echo "Configuring $USER's settings..."
+
+# include "$DVM_DIR/bin/.bash_aliases" if it exists
+if [ -f "$DVM_DIR/bin/.bash_aliases" ]; then
+  . "$DVM_DIR/bin/.bash_aliases"
+fi
+
 # include "$DVM_DIR/bin/.envars" if it exists
 if [ -f "$DVM_DIR/bin/.envars" ]; then
-   . "$DVM_DIR/bin/.envars"
+  . "$DVM_DIR/bin/.envars"
 fi
 
 # include "$DVM_DIR/bin/.pathconf" if it exists
 if [ -f "$DVM_DIR/bin/.pathconf" ]; then
-   . "$DVM_DIR/bin/.pathconf"
-fi
-
-# include "$DVM_DIR/bin/.bash_aliases" if it exists
-if [ -f "$DVM_DIR/bin/.bash_aliases" ]; then
-   . "$DVM_DIR/bin/.bash_aliases"
+  . "$DVM_DIR/bin/.pathconf"
 fi
 
 if [ -f "$DVM_DIR/bin/.scmbashprompt" ]; then
-   . "$DVM_DIR/bin/.scmbashprompt"
+  . "$DVM_DIR/bin/.scmbashprompt"
 fi
 
-# if running bash
-if [ -n "$BASH_VERSION" ]; then
-    # include only bash related scripts
-
-    # include "cdargs" if it exists
-    if [ -f "$CDARGS_SCR" ]; then
-       . "$CDARGS_SCR"
-       echo "CDARGS ready.."
-    fi
-fi
-
-echo "Settings configured for $USER"
+echo "$(coloredprintf '✔' 00FF00)" $(coloredprintf "Settings configured for ${USER}" 009900 ) "$(coloredprintf '✔' 00FF00)"

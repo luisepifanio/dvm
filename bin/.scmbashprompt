@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-echo "Running $DVM_DIR/bin/.scmbashprompt"
 #
 # File: .scmbashprompt
 # Author: Luis G. Epifanio
@@ -144,6 +143,6 @@ svn_branch () {
 
 
 # Set the prompt pattern
-export PS1="${BRIGHT_CYAN}[${CYAN}\u${BRIGHT_WHITE}@${CYAN}\h${WHITE}\$(vcs_branch)${BRIGHT_YELLOW}: \W${BRIGHT_CYAN}]${NORMAL}\$ ${RESET}"
-
+export PS1="${BRIGHT_CYAN}[${CYAN}\u${BRIGHT_WHITE}@${CYAN}\h${WHITE}\$(vcs_branch)${BRIGHT_CYAN}] [\d \t] ${BRIGHT_YELLOW} \n[\w]\n${NORMAL}▶\$ ${RESET}"
+echo "$(coloredprintf '✔' 00FF00) Smart shell prompt installed"
 } # this ensures the entire script is downloaded #
