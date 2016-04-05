@@ -93,6 +93,30 @@ install_jdk_switcher () {
     fi
 }
 
+install_clipboard_lnx () {
+    if [ ! -f "$HOME/bin/clipboard" ]; then
+        mkdir -p "$HOME/bin"
+        cp "$DVM_DIR/scripts/lnx.clipboard.sh" "$HOME/bin/clipboard"
+        chmod +x "$HOME/bin/clipboard"
+    fi
+
+    if [ -f "$HOME/bin/clipboard" ]; then
+        . "$HOME/bin/clipboard"
+    fi
+}
+
+install_clipboard_mac () {
+  if [ ! -f "$HOME/bin/clipboard" ]; then
+      mkdir -p "$HOME/bin"
+      cp "$DVM_DIR/scripts/mac.clipboard.sh" "$HOME/bin/clipboard"
+      chmod +x "$HOME/bin/clipboard"
+  fi
+
+  if [ -f "$HOME/bin/clipboard" ]; then
+      . "$HOME/bin/clipboard"
+  fi
+}
+
 install_jdk_switcher_mac () {
     if [ ! -f "$HOME/bin/jdk_switcher_mac.sh" ]; then
         wget -P "$HOME/bin" "https://raw.githubusercontent.com/luisepifanio/jdk_switcher_mac/master/jdk_switcher_mac.sh"
@@ -133,6 +157,7 @@ customlnx () {
     install_nvm
     install_jdk_switcher
     install_go_lnx
+    install_clipboard_lnx
 
     if [ -f "$HOME/bin/lnx.clipboard.sh" ]; then
         . "$HOME/bin/lnx.clipboard.sh"
@@ -148,6 +173,7 @@ custommac () {
   install_sdk
   install_nvm
   install_jdk_switcher_mac
+  install_clipboard_mac
 
   install_home_brew
   install_go_mac
