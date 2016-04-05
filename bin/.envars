@@ -86,8 +86,8 @@ if [ -f "$HOME/bin/.plataform" ]; then
 fi
 
 if [ -z "$DEVTOOLS" ]; then
-    echo "▶ DEVTOOLS must be set in .plataform, default will be $HOME/DEV_TOOLS"
-    export DEVTOOLS="$HOME/DEV_TOOLS"
+      echo "$(coloredprintf '✖' FF0000 ) ▶ DEVTOOLS must be set in .plataform, default will be $HOME/DEV_TOOLS"
+      export DEVTOOLS="$HOME/DEV_TOOLS"
 fi
 
 ###############################################################################
@@ -98,7 +98,7 @@ export ANT_HOME="$DEVTOOLS/ANT_HOME"
 export MAVEN_HOME="$DEVTOOLS/MAVEN_HOME"
 export M2_HOME="$MAVEN_HOME"
 export JMETER_HOME="$DEVTOOLS/JMETER_HOME"
-export P4V_HOME="$HOME/DEV_TOOLS/P4V_HOME"
+export P4V_HOME="$DEVTOOLS/P4V_HOME"
 export JAVA_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
 
 #PROXY RELATED

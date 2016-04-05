@@ -360,11 +360,11 @@ coloredprintf () {
   fi
 
   if ( has_installed 'python' ) && ( test -r "$DVM_DIR/bin/colortrans.py"  ); then
-    printf "$(python colortrans.py "$1" "$FG" "$BG" )"
+    printf "$(python "$DVM_DIR/bin/colortrans.py" "$1" "$FG" "$BG" )"
   else
     printf "$(setupcolor 1 "$FG")$(tput setaf 1)$(setupcolor 2 "$BG")$(tput setab 2)$1$(tput sgr0)"
   fi
-  
+
   tput sgr0
 }
 
