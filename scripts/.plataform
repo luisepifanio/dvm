@@ -146,6 +146,13 @@ install_sdk () {
         curl -s http://get.sdkman.io | bash
     fi
 
+    if ! [ -f "$HOME/.gitconfig" ]; then
+        cp "$DVM_DIR/scripts/.gitconfig" "$HOME/.gitconfig"
+    fi
+
+    if ! [ -f "$HOME/bin/gitmessage" ]; then
+        cp "$DVM_DIR/scripts/.gitmessage" "$HOME/bin/.gitmessage"
+    fi
 }
 
 customlnx () {
@@ -158,10 +165,6 @@ customlnx () {
     install_jdk_switcher
     install_go_lnx
     install_clipboard_lnx
-
-    if [ -f "$HOME/bin/lnx.clipboard.sh" ]; then
-        . "$HOME/bin/lnx.clipboard.sh"
-    fi
 }
 
 custommac () {
@@ -185,10 +188,6 @@ custommac () {
   if [ -f "$HOME/bin/.meli_aliases" ]; then
       coloredecho "▶▶ INSTALLING CUSTOM MELI SCRIPTS " '000000' 'FFFF00'
       . "$HOME/bin/.meli_aliases"
-  fi
-
-  if [ -f "$HOME/bin/mac.clipboard.sh" ]; then
-      . "$HOME/bin/mac.clipboard.sh"
   fi
 }
 
