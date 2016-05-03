@@ -150,7 +150,7 @@ install_sdk () {
         cp "$DVM_DIR/scripts/.gitconfig" "$HOME/.gitconfig"
     fi
 
-    if ! [ -f "$HOME/bin/gitmessage" ]; then
+    if ! [ -f "$HOME/bin/.gitmessage" ]; then
         cp "$DVM_DIR/scripts/.gitmessage" "$HOME/bin/.gitmessage"
     fi
 }

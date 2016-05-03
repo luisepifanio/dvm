@@ -176,6 +176,8 @@ reloadEnv () {
   unset setupcolor
   unset swapfiles
 
+  clear
+
   if [ -f "$PROFILE" ]; then
     . "$PROFILE"
   elif [ -f "$HOME/.bashrc" ]; then
