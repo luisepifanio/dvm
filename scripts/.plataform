@@ -146,20 +146,25 @@ install_sdk () {
         curl -s http://get.sdkman.io | bash
     fi
 
-    if ! [ -f "$HOME/.gitconfig" ]; then
+    if [ ! -f "$HOME/.gitconfig" ]; then
         cp "$DVM_DIR/scripts/.gitconfig" "$HOME/.gitconfig"
     fi
 
-    if ! [ -f "$HOME/bin/gitmessage" ]; then
+    if [ ! -f "$HOME/bin/.gitmessage" ]; then
         cp "$DVM_DIR/scripts/.gitmessage" "$HOME/bin/.gitmessage"
     fi
+}
+
+firts_jvm () {
+    JVM="$(update-java-alternatives -l | head -1 |sed  -E 's|.+(/.+/jvm/.+).*|\1|g')"
+    export JAVA_HOME="$JVM"
 }
 
 customlnx () {
     export DEVTOOLS="/media/DATA/DEV_TOOLS"
     export BASH_COMPLETION_SRC='/etc/profile.d/bash_completion.sh'
     export TERM='xterm-256color'
-    export JAVA_HOME="/usr/lib/jvm/java-7-oracle"
+    firts_jvm
     install_sdk
     install_nvm
     install_jdk_switcher
