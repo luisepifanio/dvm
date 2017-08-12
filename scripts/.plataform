@@ -1,0 +1,235 @@
+#!/usr/bin/env sh
+
+install_go_lnx () {
+  installgo='YES'
+  if has_installed "go"; then
+    return 0
+  elif [ "$installgo" = 'NO' ]; then
+    coloredecho "▶▶ PLEASE edit this file and change installgo to YES to install go next time  > " '000000' 'FFFF00'
+    return 1
+  elif has_installed "apt-get" && has_installed "apt-get"; then
+    sudo add-apt-repository ppa:ubuntu-lxc/lxd-stable -y
+    sudo apt-get -y update
+    sudo apt-get -y install golang
+    return 0
+  else
+    return 1
+  fi
+}
+
+install_home_brew () {
+  if has_installed "brew"; then
+    return 0
+  elif check_installed "ruby" && check_installed "curl"; then
+      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      return 0
+  else
+    coloredecho "▶▶ To install homebrew you need 'ruby' and 'curl' installed  > " '000000' 'FFFF00'
+  fi
+  return 1
+}
+
+install_go_mac () {
+  if brew list go > /dev/null 2>&1; then
+    printf ''
+  elif check_installed "brew"; then
+     brew install go --cross-compile-common
+    return 0
+  else
+    coloredecho "▶▶ To install go you need 'brew' installed  > " '000000' 'FFFF00'
+  fi
+}
+
+setup_go_environment_on () {
+  local WORKPATH="$1"
+
+  if [ -z "$WORKPATH" ]; then
+    WORKPATH="$HOME/GO_WSPC"
+    coloredecho "'$1' is not valid, by default : $WORKPATH" 'FFFF00' '000000'
+  fi
+
+  mkdir -p "$WORKPATH"
+  mkdir -p "$WORKPATH/src/github.com/$REPOUSER"
+
+  export GOPATH="$WORKPATH"
+  export PATH="$PATH:$GOPATH/bin"
+}
+
+create_go_proyect () {
+  if [ -z "$1" ]; then
+    coloredecho "You should provide a project name" 'FFFFFF' 'FF0000'
+  fi
+
+  local PRJNAME="$1"
+  local WORKPATH="$2"
+
+  if [ -z "$WORKPATH" ]; then
+    WORKPATH="$GOPATH"
+  fi
+
+  setup_go_environment_on "$WORKPATH"
+  PRJ_PATH="$WORKPATH/src/github.com/$REPOUSER/$PRJNAME"
+  if ! [ -d "$PRJ_PATH" ]; then
+    mkdir -p $PRJ_PATH
+    touch "$PRJ_PATH/README.md"
+    if has_installed "tree"; then
+      tree -L 1 "$PRJ_PATH"
+    fi
+  fi
+
+  #git init
+  #git remote add origin https://github.com/brianm/variant.git
+  #git push -u origin master
+}
+
+install_jdk_switcher () {
+    if [ ! -f "$HOME/bin/jdk_switcher.sh" ]; then
+        wget -P "$HOME/bin" "https://raw.githubusercontent.com/michaelklishin/jdk_switcher/master/jdk_switcher.sh"
+        chmod +x "$HOME/bin/jdk_switcher.sh"
+    fi
+
+    if [ -f "$HOME/bin/jdk_switcher.sh" ]; then
+        . "$HOME/bin/jdk_switcher.sh"
+    fi
+}
+
+install_clipboard_lnx () {
+    if [ ! -f "$HOME/bin/clipboard" ]; then
+        mkdir -p "$HOME/bin"
+        cp "$DVM_DIR/scripts/lnx.clipboard.sh" "$HOME/bin/clipboard"
+        chmod +x "$HOME/bin/clipboard"
+    fi
+
+    if [ -f "$HOME/bin/clipboard" ]; then
+        . "$HOME/bin/clipboard"
+    fi
+}
+
+install_clipboard_mac () {
+  if [ ! -f "$HOME/bin/clipboard" ]; then
+      mkdir -p "$HOME/bin"
+      cp "$DVM_DIR/scripts/mac.clipboard.sh" "$HOME/bin/clipboard"
+      chmod +x "$HOME/bin/clipboard"
+  fi
+
+  if [ -f "$HOME/bin/clipboard" ]; then
+      . "$HOME/bin/clipboard"
+  fi
+}
+
+install_jdk_switcher_mac () {
+    if [ ! -f "$HOME/bin/jdk_switcher_mac.sh" ]; then
+        wget -P "$HOME/bin" "https://raw.githubusercontent.com/luisepifanio/jdk_switcher_mac/master/jdk_switcher_mac.sh"
+        chmod +x "$HOME/bin/jdk_switcher_mac.sh"
+    fi
+
+    if [ -f "$HOME/bin/jdk_switcher_mac.sh" ]; then
+        . "$HOME/bin/jdk_switcher_mac.sh"
+    fi
+}
+
+install_nvm () {
+    if [ -d "$NVM_DIR" ] || [ -d "$HOME/.nvm" ]; then
+        printf ''
+    else
+        coloredecho "▶▶ Installing NVM > " '000000' 'FFFF00'
+        #curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash
+        wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash
+    fi
+}
+
+install_sdk () {
+    if [ -d "$SDKMAN_DIR" ] || [ -d "$HOME/.sdkman" ]; then
+      printf ''
+    else
+        coloredecho "▶▶ Installing SDKMAN > " '000000' 'FFFF00'
+        curl -s http://get.sdkman.io | bash
+    fi
+
+    if ! [ -f "$HOME/.gitconfig" ]; then
+        cp "$DVM_DIR/scripts/.gitconfig" "$HOME/.gitconfig"
+    fi
+
+    if ! [ -f "$HOME/bin/gitmessage" ]; then
+        cp "$DVM_DIR/scripts/gitmessage" "$HOME/bin/gitmessage"
+    fi
+}
+
+customlnx () {
+    export DEVTOOLS="/media/DATA/DEV_TOOLS"
+    export BASH_COMPLETION_SRC='/etc/profile.d/bash_completion.sh'
+    export TERM='xterm-256color'
+    export JAVA_HOME="/usr/lib/jvm/java-7-oracle"
+    install_sdk
+    install_nvm
+    install_jdk_switcher
+    install_go_lnx
+    install_clipboard_lnx
+}
+
+custommac () {
+  export JAVA_HOME="$(/usr/libexec/java_home -v1.7)"
+  export CDARGS_SCR='/usr/local/etc/bash_completion.d/cdargs-bash.sh'
+  export BASH_COMPLETION_SRC='/usr/local/etc/profile.d/bash_completion.sh'
+  export PYTHONPATH="/usr/local/lib/python2.7/site-packages:$PYTHONPATH"
+
+  install_sdk
+  install_nvm
+  install_jdk_switcher_mac
+  install_clipboard_mac
+
+  install_home_brew
+  install_go_mac
+
+  if [ -f "/Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash" ]; then
+    . "/Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash"
+  fi
+
+  if [ -f "$HOME/bin/.meli_aliases" ]; then
+      coloredecho "▶▶ INSTALLING CUSTOM MELI SCRIPTS " '000000' 'FFFF00'
+      . "$HOME/bin/.meli_aliases"
+  fi
+}
+
+bashrelated () {
+  # if running bash
+  if [ -n "$BASH_VERSION" ]; then
+    # include only bash related scripts
+    if [ -f "$BASH_COMPLETION_SRC" ]; then
+      . "$BASH_COMPLETION_SRC"
+    fi
+
+    # include "cdargs" if it exists
+    if [ -f "$CDARGS_SCR" ]; then
+      . "$CDARGS_SCR"
+    fi
+  fi
+}
+
+if [ "$(uname)" = "Darwin" ]; then
+    # Do something under Mac OS X platform
+    custommac
+    bashrelated
+elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
+    # Do something under Linux platform
+    customlnx
+    bashrelated
+elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW32_NT" ]; then
+    # Do something under Windows NT platform
+    export JAVA_HOME="C:\Program Files\Java\jdk1.7.0_71"
+else
+    echo "plataform not detected"
+fi
+
+unset install_go_lnx
+unset install_home_brew
+unset install_go_mac
+#unset setup_go_environment_on
+#unset create_go_proyect
+unset install_jdk_switcher
+unset install_jdk_switcher_mac
+unset install_nvm
+unset install_sdk
+unset customlnx
+unset custommac
+unset bashrelated

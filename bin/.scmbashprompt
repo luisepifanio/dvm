@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-echo "Running $DVM_DIR/bin/.scmbashprompt"
 #
 # File: .scmbashprompt
 # Author: Luis G. Epifanio
@@ -142,8 +141,14 @@ svn_branch () {
   fi
 }
 
+networkinfo() {
+  NET_IFACE="$(netstat -rn | awk '/^0.0.0.0/ {thif=substr($0,74,10); print thif;} /^default.*UG/ {thif=substr($0,65,10); print thif;}')"
+  NET_IP="$(ifconfig ${NET_IFACE} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')"
+
+  echo "$NET_IFACE-$NET_IP"
+}
 
 # Set the prompt pattern
-export PS1="${BRIGHT_CYAN}[${CYAN}\u${BRIGHT_WHITE}@${CYAN}\h${WHITE}\$(vcs_branch)${BRIGHT_YELLOW}: \W${BRIGHT_CYAN}]${NORMAL}\$ ${RESET}"
-
+export PS1="${BRIGHT_CYAN}[${CYAN}\u${BRIGHT_WHITE}@${CYAN}\h${WHITE}\$(vcs_branch)${BRIGHT_CYAN}] [$(networkinfo)] [$(date +'%Y-%m-%d %H:%M:%S%z')] ${BRIGHT_YELLOW} \n[\w]\n${NORMAL}▶\$ ${RESET}"
+echo "$(coloredprintf '✔' 00FF00) Smart shell prompt installed"
 } # this ensures the entire script is downloaded #

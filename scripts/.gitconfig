@@ -1,0 +1,49 @@
+[user]
+    name = Luis G. Epifanio
+    email = luis.epifanio@gmail.com
+[commit]
+    # Please edit here
+    # /Users/lepifanio/.gitignore_global
+    # template = $HOME/bin/.gitmessage
+    template = /Users/lepifanio/bin/.gitmessage
+[credential]
+    helper = cache
+[alias]
+    up = pull origin
+    st = status
+    di = diff
+    co = checkout
+    ci = commit
+    br = branch
+    sta = stash
+[color]
+    diff = auto
+    status = auto
+    branch = auto
+[merge]
+    keepBackup = false
+    tool = p4merge
+[mergetool "p4merge"]
+    cmd = $P4V_HOME/bin/p4merge \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"
+    keepTemporaries = false
+    trustExitCode = false
+    keepBackup = false
+[mergetool]
+    keepBackup = false
+[diff]
+    tool = p4merge
+[difftool "p4merge"]
+    cmd = $P4V_HOME/bin/p4merge $LOCAL $REMOTE
+[color]
+    ui = true
+[core]
+    excludesfile = /home/luis/.gitignore_global
+    editor = editor
+[url "https://github"]
+    insteadOf = git://github
+[filter "lfs"]
+    clean = git lfs clean %f
+    smudge = git lfs smudge %f
+    required = true
+[push]
+    default = simple
