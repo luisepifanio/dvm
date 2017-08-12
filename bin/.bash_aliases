@@ -12,6 +12,7 @@ alias labc='ls -lap' #alphabetical sort
 alias listFiles='ls . | xargs -n 1 basename'
 alias svim='sudo vim'
 alias grep='grep --color=auto'
+alias cdd='autopick'
 # I find typing 'cd ..' less than optimal
 alias up='cd ..'
 alias 2up='cd ../../'
@@ -239,40 +240,116 @@ chownThisFolder () {
   sudo chown -R "$USER:$(id -g -n $USER)" "$folder"
 }
 
+history_search () {
+  aterm="$1"
+  if [ -z "$aterm" ]; then
+    echo "'$aterm' is not a valid search" >&2; return 0
+  fi
+  history | grep "$aterm"
+}
+
+show_grails_opts () {
+  echo "✔ Set up for GRAILS_OPTS='$GRAILS_OPTS'"
+}
+
 grails_opts () {
   if [ -z "$1" ]; then
     echo "'$1' is not a valid config" >&2; return 0
   fi
 
-  GOPTS="-XX:PermSize=$1 -XX:MaxPermSize=$1 -Xmx$1 -Xms$1"
-  GOPTS="$GOPTS -XX:+UseParallelGC -XX:+UseParallelOldGC -server -noverify -Xshare:off -Djava.awt.headless=true"
-  GOPTS="$GOPTS -Djava.net.preferIPv4Stack=true -XX:+EliminateLocks -XX:+UseBiasedLocking"
+  GOPTS=""
+  #Heap and PermGen Sizing
+  GOPTS="-Xmx$1 -Xms128M"
+  #Comment line below for java 8
+  #GOPTS="$GOPTS -XX:PermSize=1G -XX:MaxPermSize=1G"
+
+
+  # 1. Garbage collector configuration parallel
+  #GOPTS="$GOPTS -XX:+UseParallelGC -XX:+UseParallelOldGC"
+  # 2. Garbage collector configuration concurrent mark sweep
+
+  GOPTS="$GOPTS -XX:+UseParNewGC -XX:+UseConcMarkSweepGC"
+  GOPTS="$GOPTS -XX:MinHeapFreeRatio=50 -XX:MaxHeapFreeRatio=75"
+  GOPTS="$GOPTS -XX:+CMSPrecleaningEnabled"
+  #Comment line below for java 8
+  #GOPTS="$GOPTS -XX:+CMSPermGenPrecleaningEnabled"
+  GOPTS="$GOPTS -XX:+CMSClassUnloadingEnabled -XX:+UseCMSInitiatingOccupancyOnly"
+  GOPTS="$GOPTS -XX:CMSInitiatingOccupancyFraction=65"
+  GOPTS="$GOPTS -XX:+CMSParallelRemarkEnabled"
+  GOPTS="$GOPTS -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark"
+
+  GOPTS="$GOPTS -XX:NewRatio=8 -XX:SurvivorRatio=32"
+  # Optimizations
+  GOPTS="$GOPTS -XX:MaxJavaStackTraceDepth=30 -XX:SoftRefLRUPolicyMSPerMB=10"
+  GOPTS="$GOPTS -XX:+EliminateLocks -XX:+UseBiasedLocking"
+  GOPTS="$GOPTS -Xshare:off"
+  GOPTS="$GOPTS -server -noverify"
+  GOPTS="$GOPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"
+  #
+  GOPTS="$GOPTS -Dgroovy.use.classvalue=true"
+
   export GRAILS_OPTS="$GOPTS"
 
-  echo "✔ Set up for GRAILS_OPTS=$GRAILS_OPTS"
+  show_grails_opts
 }
 
 grails_opts_clean () {
   export GRAILS_OPTS=""
-  echo "✔ Set up for GRAILS_OPTS=$GRAILS_OPTS"
+  show_grails_opts
 }
 
 java_opts_clean () {
   export JAVA_OPTS=""
-  echo "✔ Set up for JAVA_OPTS=$JAVA_OPTS"
+  echo "✔ Set up for JAVA_OPTS='$JAVA_OPTS'"
 }
 
 java_opts_ivy_logger () {
   export JAVA_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
-  echo "✔ Set up for JAVA_OPTS=$JAVA_OPTS"
+  echo "✔ Set up for JAVA_OPTS='$JAVA_OPTS'"
 }
 
 grails_opts_test () {
-  grails_opts "3G"
+  grails_opts "4G"
 }
 
 check_groovy_proxy () {
   groovy -Dhttp.proxyHost="$HTTP_PROXY_HOST" -Dhttp.proxyPort="$HTTP_PROXY_PORT" -Dhttps.proxyHost="$HTTPS_PROXY_HOST" -Dhttps.proxyPort="$HTTPS_PROXY_PORT"  -e 'try{ println "http://ifconfig.me/ip".toURL().text }catch(Exception e){ println "CHECK NETWORK|PROXY!" }'
+}
+
+enable_jvm_custom_timeouts() {
+  TIMEOUT_OPTS="-Dsun.net.client.defaultConnectTimeout=500 -Dsun.net.client.defaultReadTimeout=2000"
+  export JAVA_OPTS="$JAVA_OPTS $TIMEOUT_OPTS"
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+disable_jvm_custom_timeouts() {
+  TIMEOUT_OPTS="-Dsun.net.client.defaultConnectTimeout=500 -Dsun.net.client.defaultReadTimeout=2000"
+  export JAVA_OPTS=$( echo $JAVA_OPTS | sed -e "s| $TIMEOUT_OPTS||g"  )
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+enable_jvm_plumbr_agent() {
+  PLUMBR_OPTS="-javaagent:$DEVTOOLS/PLUMBR_HOME/plumbr.jar"
+  export JAVA_OPTS="$JAVA_OPTS $PLUMBR_OPTS"
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+disable_jvm_plumbr_agent() {
+  PLUMBR_OPTS="-javaagent:path-to/plumbr.jar"
+  export JAVA_OPTS=$( echo $JAVA_OPTS | sed -e "s| $PLUMBR_OPTS||g"  )
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+enable_jvm_dependency_logs() {
+  CUSTOM_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
+  export JAVA_OPTS="$JAVA_OPTS $CUSTOM_OPTS"
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+disable_jvm_dependency_logs() {
+  CUSTOM_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
+  export JAVA_OPTS=$( echo $JAVA_OPTS | sed -e "s|$CUSTOM_OPTS||g"  )
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
 }
 
 lls () {
@@ -370,6 +447,28 @@ coloredprintf () {
 
 coloredecho () {
   echo "$(coloredprintf "$1" "$2" "$3")"
+}
+
+autopick() {
+  local action="$1"; shift
+  case "$action" in
+    # popd needs special care not to pass empty string instead of no args
+    popd) [[ $# -eq 0 ]] && builtin popd || builtin popd "$*" ;;
+    cd)
+      if [ $# -eq 0 ]
+      then
+        builtin $action "$HOME" ;
+      else
+        builtin $action "$*";
+      fi;;
+    pushd) builtin $action "$*" ;;
+    *) return ;;
+  esac
+  # now do stuff in the new pwd
+
+   if [ -f .nvmrc ]; then
+        nvm install
+    fi
 }
 
 # enable color support of ls and also add handy aliases

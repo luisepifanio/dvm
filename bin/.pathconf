@@ -25,7 +25,8 @@ loadpaths () {
       while read line
       do
           pathvar=$( eval echo $line )
-          if [ ! -d "$pathvar" ]; then
+          echo "including '$pathvar'"
+	  if [ ! -d "$pathvar" ]; then
             echo "$(coloredprintf '✖' FF0000 ) Please check '$pathvar'"
             continue
           fi

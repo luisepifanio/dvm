@@ -37,7 +37,7 @@
     ui = true
 [core]
     excludesfile = /home/luis/.gitignore_global
-    editor = editor
+    editor = vim
 [url "https://github"]
     insteadOf = git://github
 [filter "lfs"]
