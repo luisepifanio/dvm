@@ -1,0 +1,13 @@
+# [SUBJECT] ¿What this commit does?:  ( Ej: Enables flow... )
+FEATURE|FIX|WIP|DOCS|STYLE|REFACTOR|TEST|BUILD: <subject>
+#Keep this blank line
+
+# [BODY] Explain why this change should be done
+<body>
+# [METADATA] Provide links to any relevant tickets, articles or other resources
+[TRELLO-refid](https://trello.com/c/refid)
+[GITHUB-githubid](https://github.com/mercadolibre/fury_buyingflow-api/issues/githubid)
+#Tags: 
+[TaskType:FEATURE|FIX|WIP|DOCS|STYLE|REFACTOR|TEST|BUILD]
+[TASK_ID:refid]
+[GITHUB_ISSUE:githubid]

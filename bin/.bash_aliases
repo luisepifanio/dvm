@@ -4,41 +4,44 @@
 #alias map_internal='ssh -L $LOCAL_PORT:$TARGET:$TARGET_PORT $USER@$SSH_HOST'
 alias checknode='echo "Node.js: $(node -v)" && echo "Npm Version: $(npm -v)" '
 # some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
 alias l='ls -CF'
-alias lt='ls -laptr' #oldest first sort
-alias labc='ls -lap' #alphabetical sort
-alias listFiles='ls . | xargs -n 1 basename'
-alias svim='sudo vim'
-alias grep='grep --color=auto'
+alias ll_abc='ls -lap' #alphabetical sort
+alias ll_files='ls . | xargs -n 1 basename'
+alias ll_hidden='ls -A'
+alias ll_oldest_first='ls -laptr' #oldest first sort
+alias ll='ls -alF'
 # I find typing 'cd ..' less than optimal
 alias up='cd ..'
 alias 2up='cd ../../'
 alias 3up='cd ../../../'
 alias 4up='cd ../../../../'
-# interactive
+# Miscelaneus
 alias cp='cp -vi'
+alias grep='grep --color=auto'
+alias mkdir='mkdir -pv'
 alias mv='mv -vi'
 alias ping='ping -c 10'
-alias mx='chmod a+x'
-alias 000='chmod -R 000'
-alias 644='chmod -R 644'
-alias 666='chmod -R 666'
-alias 755='chmod -R 755'
-alias 777='chmod -R 777'
-#alias rm='mkdir -p $HOME/.Trash/ && mv --target-directory=$HOME/.Trash/'
-alias mkdir='mkdir -pv'
-#CDargs should be enabled
-alias savedir='ca'
+alias svim='sudo vim'
+alias trash='mkdir -p $HOME/.Trash/ && mv --target-directory=$HOME/.Trash/'
+# Change mods
+alias chmod_000='chmod -R 000'
+alias chmod_644='chmod -R 644'
+alias chmod_666='chmod -R 666'
+alias chmod_755='chmod -R 755'
+alias chmod_777='chmod -R 777'
+alias chmod_exec='chmod a+x'
+#####################
+###    CDARGS     ###
+#####################
 alias goto='cv'
+alias savedir='ca'
 # DISK USAGE
-alias lspart='sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL'
-alias showpart='sudo fdisk -l'
-alias most='du -hsx * | sort -rn | head -10'
-alias df='df -H'
-alias du='du -ch'
-alias ducks='du -cks * | sort -rn | head'
+alias disk_usage_bytes='du -cks * | sort -rn | head'
+alias disk_usage_fs='df -H'
+alias disk_usage_pwd='du -ch'
+alias disk_usage_top10='du -hsx * | sort -rn | head -10'
+alias ll_partitions_fdisk='sudo fdisk -l'
+alias ll_partitions='sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL'
 # PROCESS RELATED
 alias ports='netstat -tulanp'
 # check if a particular process is running
@@ -65,21 +68,13 @@ alias glg='git log --date-order --all --graph --format="%C(green)%h%Creset %C(ye
 alias glg2='git log --date-order --all --graph --name-status --format="%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
 alias cleangitmergedbranches='git branch --merged | grep -v develop | grep -v master | sed -e "s|  ||g" | while read ln; do git branch -d "$ln" ; done'
 # hace pull desde el branch en el cual estoy parado, siempre desde origin
-#####################
-###    CDARGS     ###
-#####################
-#CDARGS_BASH_ALIASES="cdb"
-#
-#alias ca=_cdargs
-#alias mvb=_cdargs_mvb
-#alias cpb=_cdargs_mvb
-#alias cdb=_cdargs_cdb
-
-# End of file
 gitpull () {
   BRANCH=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ \1/')
   git pull origin "$BRANCH"
 }
+# Fun
+alias weather-cba="curl http://wttr.in/cordoba"
+alias weather="curl http://wttr.in"
 
 # hace push al branch en el cual estoy parado, siempre en origin
 gitpush () {
@@ -90,6 +85,54 @@ gitpush () {
 #################
 ### FUNCTIONS ###
 #################
+upper () {
+  [ $# -ne 1  ] && echo "upper requires 1 argument" && return 1
+  check_installed tr
+  echo "$1" | tr '[:lower:]' '[:upper:]'
+}
+
+lower () {
+  [ $# -ne 1  ] && echo "lower requires 1 argument" && return 1
+  check_installed tr
+  echo "$1" | tr '[:upper:]' '[:lower:]'
+}
+### Plataform ###
+if_nix () {
+  [ $# -ne 1  ] && echo "if_nix requires 1 argument" && return 1
+
+  TARGETOS="$(upper $1)"
+
+  OS="UNKNOWN"
+  if [ -z "$OSTYPE" ]; then
+    # Detect the platform (alternative to $OSTYPE)
+    OS="$(uname)"
+    case $OS in
+      'AIX')        OS='AIX'          ;;
+      'Darwin')     OS='OSX'          ;;
+      'FreeBSD')    OS='BSD'          ;;
+      'Linux')      OS='LINUX'        ;;
+      'SunOS')      OS='SOLARIS'      ;;
+      'WindowsNT')  OS='WINDOWS'      ;;
+      *)            OS="UNKNOWN:$OS"  ;;
+    esac
+  else
+    case "$OSTYPE" in
+      bsd*)         OS='BSD'          ;;
+      darwin*)      OS='OSX'          ;; 
+      linux*)       OS='LINUX'        ;;
+      msys*)        OS='WINDOWS'      ;;
+      solaris*)     OS='SOLARIS'      ;;
+      *)            OS="UNKNOWN:$OS"  ;;
+    esac
+  fi
+
+  [ "$OS" == "$TARGETOS" ];
+}
+
+if_os_osx () { if_nix OSX; }
+if_os_linux () { if_nix LINUX; }
+if_os_windows () { if_nix WINDOWS; }
+
 ff () {
   find . -name "$@" -print;
 }
@@ -161,22 +204,37 @@ psgrep () {
 }
 
 reloadEnv () {
+  unset allips
+  unset catecho
   unset check_groovy_proxy
   unset check_installed
   unset chownThisFolder
   unset coloredecho
   unset coloredprintf
   unset compress
+  unset disable_jvm_custom_timeouts
+  unset disable_jvm_dependency_logs
+  unset disable_jvm_plumbr_agent
   unset disable_proxy
+  unset enable_jvm_custom_timeouts
+  unset enable_jvm_dependency_logs
+  unset enable_jvm_plumbr_agent
   unset enable_proxy
   unset extract
   unset ff
+  unset getCellAt
   unset gitpull
   unset gitpush
   unset grails_opts
   unset grails_opts_clean
   unset grails_opts_test
   unset has_installed
+  unset history_search
+  unset host2ip
+  unset if_nix
+  unset if_os_linux
+  unset if_os_osx
+  unset if_os_windows
   unset ignore
   unset java_opts_clean
   unset java_opts_ivy_logger
@@ -188,9 +246,8 @@ reloadEnv () {
   unset reloadEnv
   unset serverOn
   unset setupcolor
+  unset show_grails_opts
   unset swapfiles
-  unset host2ip
-  unset getCellAt
 
   if [ -f "$PROFILE" ]; then
     . "$PROFILE"
@@ -244,7 +301,6 @@ enable_proxy () {
 disable_proxy () {
   export https_proxy=""
   export http_proxy=""
-
 }
 
 chownThisFolder () {
@@ -255,40 +311,115 @@ chownThisFolder () {
   sudo chown -R "$USER:$(id -g -n $USER)" "$folder"
 }
 
+history_search () {
+  aterm="$1"
+  if [ -z "$aterm" ]; then
+    echo "'$aterm' is not a valid search" >&2; return 0
+  fi
+  history | grep "$aterm"
+}
+
+show_grails_opts () {
+  echo "✔ Set up for GRAILS_OPTS='$GRAILS_OPTS'"
+}
+
 grails_opts () {
   if [ -z "$1" ]; then
     echo "'$1' is not a valid config" >&2; return 0
   fi
 
-  GOPTS="-XX:PermSize=$1 -XX:MaxPermSize=$1 -Xmx$1 -Xms$1"
-  GOPTS="$GOPTS -XX:+UseParallelGC -XX:+UseParallelOldGC -server -noverify -Xshare:off -Djava.awt.headless=true"
-  GOPTS="$GOPTS -Djava.net.preferIPv4Stack=true -XX:+EliminateLocks -XX:+UseBiasedLocking"
+  GOPTS=""
+  #Heap and PermGen Sizing
+  GOPTS="-Xmx$1 -Xms128M"
+  #Comment line below for java 8
+  #GOPTS="$GOPTS -XX:PermSize=1G -XX:MaxPermSize=1G"
+
+  # 1. Garbage collector configuration parallel
+  #GOPTS="$GOPTS -XX:+UseParallelGC -XX:+UseParallelOldGC"
+  # 2. Garbage collector configuration concurrent mark sweep
+
+  GOPTS="$GOPTS -XX:+UseParNewGC -XX:+UseConcMarkSweepGC"
+  GOPTS="$GOPTS -XX:MinHeapFreeRatio=50 -XX:MaxHeapFreeRatio=75"
+  GOPTS="$GOPTS -XX:+CMSPrecleaningEnabled"
+  #Comment line below for java 8
+  #GOPTS="$GOPTS -XX:+CMSPermGenPrecleaningEnabled"
+  GOPTS="$GOPTS -XX:+CMSClassUnloadingEnabled -XX:+UseCMSInitiatingOccupancyOnly"
+  GOPTS="$GOPTS -XX:CMSInitiatingOccupancyFraction=65"
+  GOPTS="$GOPTS -XX:+CMSParallelRemarkEnabled"
+  GOPTS="$GOPTS -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark"
+
+  GOPTS="$GOPTS -XX:NewRatio=8 -XX:SurvivorRatio=32"
+  # Optimizations
+  GOPTS="$GOPTS -XX:MaxJavaStackTraceDepth=30 -XX:SoftRefLRUPolicyMSPerMB=10"
+  GOPTS="$GOPTS -XX:+EliminateLocks -XX:+UseBiasedLocking"
+  GOPTS="$GOPTS -Xshare:off"
+  GOPTS="$GOPTS -server -noverify"
+  GOPTS="$GOPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"
+  #
+  GOPTS="$GOPTS -Dgroovy.use.classvalue=true"
+
   export GRAILS_OPTS="$GOPTS"
 
-  echo "✔ Set up for GRAILS_OPTS=$GRAILS_OPTS"
+  show_grails_opts
 }
 
 grails_opts_clean () {
   export GRAILS_OPTS=""
-  echo "✔ Set up for GRAILS_OPTS=$GRAILS_OPTS"
+  show_grails_opts
 }
 
 java_opts_clean () {
   export JAVA_OPTS=""
-  echo "✔ Set up for JAVA_OPTS=$JAVA_OPTS"
+  echo "✔ Set up for JAVA_OPTS='$JAVA_OPTS'"
 }
 
 java_opts_ivy_logger () {
   export JAVA_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
-  echo "✔ Set up for JAVA_OPTS=$JAVA_OPTS"
+  echo "✔ Set up for JAVA_OPTS='$JAVA_OPTS'"
 }
 
 grails_opts_test () {
-  grails_opts "3G"
+  grails_opts "4G"
 }
 
 check_groovy_proxy () {
   groovy -Dhttp.proxyHost="$HTTP_PROXY_HOST" -Dhttp.proxyPort="$HTTP_PROXY_PORT" -Dhttps.proxyHost="$HTTPS_PROXY_HOST" -Dhttps.proxyPort="$HTTPS_PROXY_PORT"  -e 'try{ println "http://ifconfig.me/ip".toURL().text }catch(Exception e){ println "CHECK NETWORK|PROXY!" }'
+}
+
+enable_jvm_custom_timeouts() {
+  TIMEOUT_OPTS="-Dsun.net.client.defaultConnectTimeout=500 -Dsun.net.client.defaultReadTimeout=2000"
+  export JAVA_OPTS="$JAVA_OPTS $TIMEOUT_OPTS"
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+disable_jvm_custom_timeouts() {
+  TIMEOUT_OPTS="-Dsun.net.client.defaultConnectTimeout=500 -Dsun.net.client.defaultReadTimeout=2000"
+  export JAVA_OPTS=$( echo $JAVA_OPTS | sed -e "s| $TIMEOUT_OPTS||g"  )
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+enable_jvm_plumbr_agent() {
+  PLUMBR_OPTS="-javaagent:$DEVTOOLS/PLUMBR_HOME/plumbr.jar"
+  export JAVA_OPTS="$JAVA_OPTS $PLUMBR_OPTS"
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+disable_jvm_plumbr_agent() {
+  PLUMBR_OPTS="-javaagent:path-to/plumbr.jar"
+  export JAVA_OPTS=$( echo $JAVA_OPTS | sed -e "s| $PLUMBR_OPTS||g"  )
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+enable_jvm_dependency_logs() {
+  CUSTOM_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
+  export JAVA_OPTS="$JAVA_OPTS $CUSTOM_OPTS"
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+disable_jvm_dependency_logs() {
+  CUSTOM_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
+  export JAVA_OPTS=$( echo $JAVA_OPTS | sed -e "s|$CUSTOM_OPTS||g"  )
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
 }
 
 lls () {
@@ -299,6 +430,7 @@ lls () {
 
   echo "$( stat -c '%A (%a) %8s %.19y %n' $folder )"
 }
+
 #########
 #netinfo - shows network information for your system
 
@@ -306,7 +438,6 @@ mypublicip () {
   myip=$( dig +short myip.opendns.com @resolver1.opendns.com )
   echo "${myip}"
 }
-
 
 swapfiles () {
   # Swap 2 filenames around, if they exist (from Uzi's bashrc).
@@ -388,13 +519,11 @@ coloredecho () {
   echo "$(coloredprintf "$1" "$2" "$3")"
 }
 
-allips()
-{
+allips() {
   ifconfig | awk '/inet / {sub(/addr:/, "", $2); print $2}'
 }
 
-host2ip()
-{
+host2ip() {
   [ $# -ne 1  ] && echo "host2ip: 1 arguments needed" && return 1
   [ -z "$1" ] && echo "host2ip: $1 does not exist" && return 1
 
@@ -426,7 +555,6 @@ getCellAt() {
 
   catecho | awk "{print \$${COL}}" | sed "${ROW}q;d"
 }
-
 # enable color support of ls and also add handy aliases
 if has_installed "dircolors"; then
   if [ -r ~/.dircolors ] ; then

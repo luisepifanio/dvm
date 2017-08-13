@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 install_go_lnx () {
-  installgo='YES'
+  installgo='NO'
   if has_installed "go"; then
     return 0
   elif [ "$installgo" = 'NO' ]; then
@@ -150,8 +150,8 @@ install_sdk () {
         cp "$DVM_DIR/scripts/.gitconfig" "$HOME/.gitconfig"
     fi
 
-    if ! [ -f "$HOME/bin/gitmessage" ]; then
-        cp "$DVM_DIR/scripts/gitmessage" "$HOME/bin/gitmessage"
+    if ! [ -f "$HOME/bin/.gitmessage" ]; then
+        cp "$DVM_DIR/scripts/.gitmessage" "$HOME/bin/.gitmessage"
     fi
 }
 
@@ -164,7 +164,20 @@ customlnx () {
     install_nvm
     install_jdk_switcher
     install_go_lnx
+    setup_go_environment_on
     install_clipboard_lnx
+
+
+    if [ -f "$HOME/bin/lnx.clipboard.sh" ]; then
+        . "$HOME/bin/lnx.clipboard.sh"
+    fi
+
+    if [ -r "$NVM_DIR/bash_completion" ]; then
+        . "$NVM_DIR/bash_completion"
+    fi
+    if [ -r "/usr/share/doc/cdargs/examples/cdargs-bash.sh" ]; then
+        source "/usr/share/doc/cdargs/examples/cdargs-bash.sh"
+    fi
 }
 
 custommac () {
@@ -189,6 +202,14 @@ custommac () {
       coloredecho "▶▶ INSTALLING CUSTOM MELI SCRIPTS " '000000' 'FFFF00'
       . "$HOME/bin/.meli_aliases"
   fi
+
+  if [ -f "$HOME/bin/mac.clipboard.sh" ]; then
+      . "$HOME/bin/mac.clipboard.sh"
+  fi
+
+  if [ -r "$NVM_DIR/bash_completion" ]; then
+      . "$NVM_DIR/bash_completion"
+  fi
 }
 
 bashrelated () {
@@ -203,6 +224,12 @@ bashrelated () {
     if [ -f "$CDARGS_SCR" ]; then
       . "$CDARGS_SCR"
     fi
+
+    # include sensitive values
+    if [ -f "$HOME/bin/.sensite_ext" ]; then
+        . "$HOME/bin/.sensite_ext"
+    fi
+
   fi
 }
 

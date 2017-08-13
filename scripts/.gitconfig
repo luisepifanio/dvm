@@ -1,11 +1,9 @@
 [user]
-    name = Luis G. Epifanio
-    email = luis.epifanio@gmail.com
+    name = Please Complete your name
+    email = Please Complete your mail
 [commit]
     # Please edit here
-    # /Users/lepifanio/.gitignore_global
-    # template = $HOME/bin/.gitmessage
-    template = /Users/lepifanio/bin/.gitmessage
+    template = $HOME/bin/.gitmessage
 [credential]
     helper = cache
 [alias]
@@ -37,8 +35,9 @@
 [color]
     ui = true
 [core]
-    excludesfile = /home/luis/.gitignore_global
-    editor = editor
+    # Please edit here
+    excludesfile = $HOME/.gitignore_global
+    editor = vim
 [url "https://github"]
     insteadOf = git://github
 [filter "lfs"]
