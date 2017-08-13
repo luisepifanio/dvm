@@ -248,15 +248,15 @@ else
     echo "plataform not detected"
 fi
 
-unset install_go_lnx
-unset install_home_brew
-unset install_go_mac
-#unset setup_go_environment_on
 #unset create_go_proyect
+#unset setup_go_environment_on
+unset bashrelated
+unset customlnx
+unset custommac
+unset install_go_lnx
+unset install_go_mac
+unset install_home_brew
 unset install_jdk_switcher
 unset install_jdk_switcher_mac
 unset install_nvm
 unset install_sdk
-unset customlnx
-unset custommac
-unset bashrelated
