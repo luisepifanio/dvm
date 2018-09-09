@@ -4,4 +4,5 @@ $MAVEN_HOME/bin
 $P4V_HOME/bin
 $JMETER_HOME/bin
 $DEVTOOLS/CHARLES_HOME/bin
+/home/luis/anaconda3/bin
 #Commented line

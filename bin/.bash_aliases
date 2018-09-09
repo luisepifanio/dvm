@@ -203,9 +203,18 @@ psgrep () {
   fi
 }
 
+pcdl () {
+  [ $# -ne 1  ] && echo "'pcdl' requires an url" && return 1
+  check_installed proxychains
+  proxychains sudo wget --continue "$1"
+}
+
 reloadEnv () {
+  unset add_param_to
   unset allips
   unset catecho
+  unset change_property_value_of
+  unset change_value_of
   unset check_groovy_proxy
   unset check_installed
   unset chownThisFolder
@@ -240,14 +249,18 @@ reloadEnv () {
   unset java_opts_ivy_logger
   unset lls
   unset mypublicip
+  unset pcdl
   unset pidOnPort
   unset portcheck
   unset psgrep
   unset reloadEnv
+  unset remove_param_of
   unset serverOn
   unset setupcolor
   unset show_grails_opts
+  unset string_sorter
   unset swapfiles
+  unset wheather
 
   if [ -f "$PROFILE" ]; then
     . "$PROFILE"
@@ -330,7 +343,9 @@ grails_opts () {
 
   GOPTS=""
   #Heap and PermGen Sizing
-  GOPTS="-Xmx$1 -Xms128M"
+  add_param_to JAVA_OPTS "-Xmx$1"
+  add_param_to JAVA_OPTS "-Xms128M"
+
   #Comment line below for java 8
   #GOPTS="$GOPTS -XX:PermSize=1G -XX:MaxPermSize=1G"
 
@@ -338,29 +353,40 @@ grails_opts () {
   #GOPTS="$GOPTS -XX:+UseParallelGC -XX:+UseParallelOldGC"
   # 2. Garbage collector configuration concurrent mark sweep
 
-  GOPTS="$GOPTS -XX:+UseParNewGC -XX:+UseConcMarkSweepGC"
-  GOPTS="$GOPTS -XX:MinHeapFreeRatio=50 -XX:MaxHeapFreeRatio=75"
-  GOPTS="$GOPTS -XX:+CMSPrecleaningEnabled"
+  add_param_to JAVA_OPTS "-XX:+UseParNewGC"
+  add_param_to JAVA_OPTS "-XX:+UseConcMarkSweepGC"
+
+  change_property_value_of JAVA_OPTS -XX:MinHeapFreeRatio 50
+  change_property_value_of JAVA_OPTS -XX:MaxHeapFreeRatio 75
+  add_param_to JAVA_OPTS "-XX:+CMSPrecleaningEnabled"
+
   #Comment line below for java 8
   #GOPTS="$GOPTS -XX:+CMSPermGenPrecleaningEnabled"
-  GOPTS="$GOPTS -XX:+CMSClassUnloadingEnabled -XX:+UseCMSInitiatingOccupancyOnly"
-  GOPTS="$GOPTS -XX:CMSInitiatingOccupancyFraction=65"
-  GOPTS="$GOPTS -XX:+CMSParallelRemarkEnabled"
-  GOPTS="$GOPTS -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark"
+  add_param_to JAVA_OPTS "-XX:+CMSClassUnloadingEnabled"
+  add_param_to JAVA_OPTS "-XX:+UseCMSInitiatingOccupancyOnly"
+  change_property_value_of JAVA_OPTS -XX:CMSInitiatingOccupancyFraction 65
 
-  GOPTS="$GOPTS -XX:NewRatio=8 -XX:SurvivorRatio=32"
+  add_param_to JAVA_OPTS "-XX:+CMSParallelRemarkEnabled"
+  add_param_to JAVA_OPTS "-XX:+ScavengeBeforeFullGC"
+  add_param_to JAVA_OPTS "-XX:+CMSScavengeBeforeRemark"
+
+  change_property_value_of JAVA_OPTS -XX:NewRatio 8
+  change_property_value_of JAVA_OPTS -XX:SurvivorRatio 32
+
   # Optimizations
-  GOPTS="$GOPTS -XX:MaxJavaStackTraceDepth=30 -XX:SoftRefLRUPolicyMSPerMB=10"
-  GOPTS="$GOPTS -XX:+EliminateLocks -XX:+UseBiasedLocking"
-  GOPTS="$GOPTS -Xshare:off"
-  GOPTS="$GOPTS -server -noverify"
-  GOPTS="$GOPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"
+  change_property_value_of JAVA_OPTS -XX:MaxJavaStackTraceDepth 30
+  change_property_value_of JAVA_OPTS -XX:SoftRefLRUPolicyMSPerMB 10
+
+  add_param_to JAVA_OPTS '-XX:+EliminateLocks'
+  add_param_to JAVA_OPTS '-XX:+UseBiasedLocking'
+  add_param_to JAVA_OPTS '-Xshare:off'
+  add_param_to JAVA_OPTS '-server' 
+  add_param_to JAVA_OPTS '-noverify'
+  change_property_value_of JAVA_OPTS '-Djava.awt.headless' true 
+  change_property_value_of JAVA_OPTS '-Djava.net.preferIPv4Stack' true
+  change_property_value_of JAVA_OPTS '-Dgroovy.use.classvalue' true
   #
-  GOPTS="$GOPTS -Dgroovy.use.classvalue=true"
 
-  export GRAILS_OPTS="$GOPTS"
-
-  show_grails_opts
 }
 
 grails_opts_clean () {
@@ -382,20 +408,128 @@ grails_opts_test () {
   grails_opts "4G"
 }
 
+string_sorter () {
+
+  INPUT="$1"
+  [ -z "$INPUT" ] && INPUT=""
+  SEP="$2"
+  [ -z "$SEP" ] && SEP=","
+
+  echo "$INPUT" | tr "$SEP" "\n" | sort | uniq | tr "\n" "$SEP" | sed "s|$SEP$|\n|"
+}
+
+add_param_to () {
+  if [ -z "$1" ]; then
+    echo "'$1' variable name should be not null" >&2; return 0
+  fi
+
+  if [ -z "$2" ]; then
+    echo "'$2' param should be not null" >&2; return 0
+  fi
+
+  DLRSIGN='$'
+  VARNAME="$1"
+  PARAM="$2"
+
+  BEFORE=$( eval echo "$DLRSIGN$VARNAME" )
+  [ -z "$BEFORE" ] && export "$VARNAME"="" #Creates empty
+
+  AFTER=$( echo "$BEFORE $PARAM" | sed 's| \{1,\}| |g' )
+
+  AFTER=$( string_sorter "$AFTER" ' ' )
+  [ ! -z "$AFTER" ] && export "$VARNAME"="$AFTER"
+  
+  diff  <(echo "$BEFORE" ) <(echo "$AFTER")
+
+}
+
+remove_param_of () {
+  # removes params of type "$PARAM" "server"
+  if [ -z "$1" ]; then
+    echo "'$1' variable name should be not null" >&2; return 0
+  fi
+
+  if [ -z "$2" ]; then
+    echo "'$2' param should be not null" >&2; return 0
+  fi
+
+  DLRSIGN='$'
+  MINUSSIGN=''
+  VARNAME="$1"
+  PARAM="$2"
+
+  BEFORE=$( eval echo "$DLRSIGN$VARNAME" )
+  AFTER=$( echo "$BEFORE" | sed -e "s|$MINUSSIGN$PARAM||g" | sed 's| \{1,\}| |g' )
+
+  AFTER=$( string_sorter "$AFTER" ' ' )
+  [ ! -z "$BEFORE" ] && export "$VARNAME"="$AFTER"
+  diff  <(echo "$BEFORE" ) <(echo "$AFTER")
+}
+
+change_property_value_of () {
+  # Changes values of type "$KEY=$VALUE" i.e -XX:MinHeapFreeRatio=50
+  if [ -z "$1" ]; then
+    echo "'$1' variable name should be not null" >&2; return 0
+  fi
+
+  if [ -z "$2" ]; then
+    echo "'$2' key should be not null" >&2; return 0
+  fi
+
+  if [ -z "$3" ]; then
+    echo "'$3' value should be not null" >&2; return 0
+  fi
+
+  DLRSIGN='$'
+  VARNAME="$1"
+  KEY="$2"
+  VALUE="$3"
+
+  BEFORE=$( eval echo "$DLRSIGN$VARNAME" )
+  [ -z "$BEFORE" ] && export "$VARNAME"="" #Creates empty
+  AFTER=$( echo "$BEFORE $KEY=$VALUE" | sed -E "s|(\s*$KEY)=([a-zA-Z0-9\.]*)\s*|\1=$VALUE |g" | sed 's| \{1,\}| |g' )
+  AFTER=$( string_sorter "$AFTER" ' ' )
+  [ ! -z "$AFTER" ] && export "$VARNAME"="$AFTER"
+  diff  <(echo "$BEFORE" ) <(echo "$AFTER")
+
+}
+
+remove_property_value_of () {
+  # Changes values of type "$KEY=$VALUE" i.e -XX:MinHeapFreeRatio=50
+  if [ -z "$1" ]; then
+    echo "'$1' variable name should be not null" >&2; return 0
+  fi
+
+  if [ -z "$2" ]; then
+    echo "'$2' key should be not null" >&2; return 0
+  fi
+
+  DLRSIGN='$'
+  VARNAME="$1"
+  KEY="$2"
+
+  BEFORE=$( eval echo "$DLRSIGN$VARNAME" )
+  AFTER=$( echo "$BEFORE" | sed -E "s|(\s*$KEY)=([a-zA-Z0-9\.]*)\s*| |g" | sed 's| \{1,\}| |g' )
+  AFTER=$( string_sorter "$AFTER" ' ' )
+  [ ! -z "$BEFORE" ] && export "$VARNAME"="$AFTER"
+  diff  <(echo "$BEFORE" ) <(echo "$AFTER")
+
+}
+
 check_groovy_proxy () {
   groovy -Dhttp.proxyHost="$HTTP_PROXY_HOST" -Dhttp.proxyPort="$HTTP_PROXY_PORT" -Dhttps.proxyHost="$HTTPS_PROXY_HOST" -Dhttps.proxyPort="$HTTPS_PROXY_PORT"  -e 'try{ println "http://ifconfig.me/ip".toURL().text }catch(Exception e){ println "CHECK NETWORK|PROXY!" }'
 }
 
 enable_jvm_custom_timeouts() {
-  TIMEOUT_OPTS="-Dsun.net.client.defaultConnectTimeout=500 -Dsun.net.client.defaultReadTimeout=2000"
-  export JAVA_OPTS="$JAVA_OPTS $TIMEOUT_OPTS"
+  change_property_value_of JAVA_OPTS -Dsun.net.client.defaultConnectTimeout 500
+  change_property_value_of JAVA_OPTS -Dsun.net.client.defaultReadTimeout 2000
   echo "\$JAVA_OPTS='$JAVA_OPTS'"
 }
 
 disable_jvm_custom_timeouts() {
-  TIMEOUT_OPTS="-Dsun.net.client.defaultConnectTimeout=500 -Dsun.net.client.defaultReadTimeout=2000"
-  export JAVA_OPTS=$( echo $JAVA_OPTS | sed -e "s| $TIMEOUT_OPTS||g"  )
-  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+  remove_property_value_of JAVA_OPTS -Dsun.net.client.defaultConnectTimeout
+  remove_property_value_of JAVA_OPTS -Dsun.net.client.defaultReadTimeout
+
 }
 
 enable_jvm_plumbr_agent() {
@@ -411,14 +545,15 @@ disable_jvm_plumbr_agent() {
 }
 
 enable_jvm_dependency_logs() {
-  CUSTOM_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
-  export JAVA_OPTS="$JAVA_OPTS $CUSTOM_OPTS"
+  change_property_value_of JAVA_OPTS -Dgroovy.grape.report.downloads true
+  change_property_value_of JAVA_OPTS -Divy.message.logger.level 4
+
   echo "\$JAVA_OPTS='$JAVA_OPTS'"
 }
 
 disable_jvm_dependency_logs() {
-  CUSTOM_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
-  export JAVA_OPTS=$( echo $JAVA_OPTS | sed -e "s|$CUSTOM_OPTS||g"  )
+  remove_property_value_of JAVA_OPTS -Dgroovy.grape.report.downloads
+  remove_property_value_of JAVA_OPTS -Divy.message.logger.level
   echo "\$JAVA_OPTS='$JAVA_OPTS'"
 }
 
@@ -541,6 +676,15 @@ catecho () {
     else
         echo "$*"
     fi
+}
+
+wheather() {
+  aterm="$1"
+  if [ -z "$aterm" ]; then
+    curl 'wttr.in'
+  else
+    curl "wttr.in/$aterm"
+  fi
 }
 
 getCellAt() {
