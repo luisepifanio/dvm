@@ -185,7 +185,10 @@ custommac () {
 
   install_home_brew
   install_go_mac
-
+  
+  alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
+  alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
+  
   if [ -f "/Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash" ]; then
     . "/Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash"
   fi
@@ -226,15 +229,15 @@ else
     echo "plataform not detected"
 fi
 
-unset install_go_lnx
-unset install_home_brew
-unset install_go_mac
-#unset setup_go_environment_on
 #unset create_go_proyect
+#unset setup_go_environment_on
+unset bashrelated
+unset customlnx
+unset custommac
+unset install_go_lnx
+unset install_go_mac
+unset install_home_brew
 unset install_jdk_switcher
 unset install_jdk_switcher_mac
 unset install_nvm
 unset install_sdk
-unset customlnx
-unset custommac
-unset bashrelated
