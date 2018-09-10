@@ -193,7 +193,10 @@ custommac () {
 
   install_home_brew
   install_go_mac
-
+  
+  alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
+  alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
+  
   if [ -f "/Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash" ]; then
     . "/Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash"
   fi
