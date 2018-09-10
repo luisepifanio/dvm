@@ -23,6 +23,7 @@ fi
 #                       HERE YOU CAN TWEAK YOUR VARS                          #
 ###############################################################################
 
+export OS="$(uname)"
 export ANT_HOME="$DEVTOOLS/ANT_HOME"
 export MAVEN_HOME="$DEVTOOLS/MAVEN_HOME"
 export M2_HOME="$MAVEN_HOME"

@@ -1,7 +1,13 @@
-# Este commit ¿Que hace?:  ( Ej: Se habilita el flow de... )
+# [SUBJECT] ¿What this commit does?:  ( Ej: Enables flow... )
+FEATURE|FIX|WIP|DOCS|STYLE|REFACTOR|TEST|BUILD: <subject>
+#Keep this blank line
 
-# Explica porque se debe realizar este cambio
+# [BODY] Explain why this change should be done
 
-# Provide links to any relevant tickets, articles or other resources
-[TRELLO-SKqLLpyI](https://trello.com/c/SKqLLpyI)
-Tags: [TaskType:FEATURE] [TASK_ID:SKqLLpyI]
+# [METADATA] Provide links to any relevant tickets, articles or other resources
+[TRELLO-refid](https://trello.com/c/refid)
+[GITHUB-githubid](https://github.com/luisepifanio/dvm/issues/githubid)
+#Tags: 
+[TaskType:FEATURE|FIX|WIP|DOCS|STYLE|REFACTOR|TEST|BUILD]
+[TASK_ID:refid]
+[GITHUB_ISSUE:githubid]

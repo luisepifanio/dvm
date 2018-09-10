@@ -164,7 +164,20 @@ customlnx () {
     install_nvm
     install_jdk_switcher
     install_go_lnx
+    setup_go_environment_on
     install_clipboard_lnx
+
+
+    if [ -f "$HOME/bin/lnx.clipboard.sh" ]; then
+        . "$HOME/bin/lnx.clipboard.sh"
+    fi
+
+    if [ -r "$NVM_DIR/bash_completion" ]; then
+        . "$NVM_DIR/bash_completion"
+    fi
+    if [ -r "/usr/share/doc/cdargs/examples/cdargs-bash.sh" ]; then
+        source "/usr/share/doc/cdargs/examples/cdargs-bash.sh"
+    fi
 }
 
 custommac () {
@@ -192,6 +205,14 @@ custommac () {
       coloredecho "▶▶ INSTALLING CUSTOM MELI SCRIPTS " '000000' 'FFFF00'
       . "$HOME/bin/.meli_aliases"
   fi
+
+  if [ -f "$HOME/bin/mac.clipboard.sh" ]; then
+      . "$HOME/bin/mac.clipboard.sh"
+  fi
+
+  if [ -r "$NVM_DIR/bash_completion" ]; then
+      . "$NVM_DIR/bash_completion"
+  fi
 }
 
 bashrelated () {
@@ -206,6 +227,12 @@ bashrelated () {
     if [ -f "$CDARGS_SCR" ]; then
       . "$CDARGS_SCR"
     fi
+
+    # include sensitive values
+    if [ -f "$HOME/bin/.sensite_ext" ]; then
+        . "$HOME/bin/.sensite_ext"
+    fi
+
   fi
 }
 
@@ -224,15 +251,15 @@ else
     echo "plataform not detected"
 fi
 
-unset install_go_lnx
-unset install_home_brew
-unset install_go_mac
-#unset setup_go_environment_on
 #unset create_go_proyect
+#unset setup_go_environment_on
+unset bashrelated
+unset customlnx
+unset custommac
+unset install_go_lnx
+unset install_go_mac
+unset install_home_brew
 unset install_jdk_switcher
 unset install_jdk_switcher_mac
 unset install_nvm
 unset install_sdk
-unset customlnx
-unset custommac
-unset bashrelated

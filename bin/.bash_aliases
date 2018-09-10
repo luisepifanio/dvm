@@ -4,41 +4,44 @@
 #alias map_internal='ssh -L $LOCAL_PORT:$TARGET:$TARGET_PORT $USER@$SSH_HOST'
 alias checknode='echo "Node.js: $(node -v)" && echo "Npm Version: $(npm -v)" '
 # some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
 alias l='ls -CF'
-alias lt='ls -laptr' #oldest first sort
-alias labc='ls -lap' #alphabetical sort
-alias listFiles='ls . | xargs -n 1 basename'
-alias svim='sudo vim'
-alias grep='grep --color=auto'
+alias ll_abc='ls -lap' #alphabetical sort
+alias ll_files='ls . | xargs -n 1 basename'
+alias ll_hidden='ls -A'
+alias ll_oldest_first='ls -laptr' #oldest first sort
+alias ll='ls -alF'
 # I find typing 'cd ..' less than optimal
 alias up='cd ..'
 alias 2up='cd ../../'
 alias 3up='cd ../../../'
 alias 4up='cd ../../../../'
-# interactive
+# Miscelaneus
 alias cp='cp -vi'
+alias grep='grep --color=auto'
+alias mkdir='mkdir -pv'
 alias mv='mv -vi'
 alias ping='ping -c 10'
-alias mx='chmod a+x'
-alias 000='chmod -R 000'
-alias 644='chmod -R 644'
-alias 666='chmod -R 666'
-alias 755='chmod -R 755'
-alias 777='chmod -R 777'
-#alias rm='mkdir -p $HOME/.Trash/ && mv --target-directory=$HOME/.Trash/'
-alias mkdir='mkdir -pv'
-#CDargs should be enabled
+alias svim='sudo vim'
+alias trash='mkdir -p $HOME/.Trash/ && mv --target-directory=$HOME/.Trash/'
+# Change mods
+alias chmod_000='chmod -R 000'
+alias chmod_644='chmod -R 644'
+alias chmod_666='chmod -R 666'
+alias chmod_755='chmod -R 755'
+alias chmod_777='chmod -R 777'
+alias chmod_exec='chmod a+x'
+#####################
+###    CDARGS     ###
+#####################
+alias goto='cv'
 alias savedir='ca'
-alias goto='cdb'
 # DISK USAGE
-alias lspart='sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL'
-alias showpart='sudo fdisk -l'
-alias most='du -hsx * | sort -rn | head -10'
-alias df='df -H'
-alias du='du -ch'
-alias ducks='du -cks * | sort -rn | head'
+alias disk_usage_bytes='du -cks * | sort -rn | head'
+alias disk_usage_fs='df -H'
+alias disk_usage_pwd='du -ch'
+alias disk_usage_top10='du -hsx * | sort -rn | head -10'
+alias ll_partitions_fdisk='sudo fdisk -l'
+alias ll_partitions='sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL'
 # PROCESS RELATED
 alias ports='netstat -tulanp'
 # check if a particular process is running
@@ -56,17 +59,22 @@ alias shutdown='sudo /sbin/shutdown'
 alias gcleanbuild='grails clean  && grails test-app :unit --non-interactive'
 alias prettyjson='python -m json.tool'
 alias clearctrlchars='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
+#Text processing#####
+alias single_spaces="sed 's|\s\+| |g'"
 #####################
 ### SCM FUNCTIONS ###
 #####################
+# hace pull desde el branch en el cual estoy parado, siempre desde origin
+alias cleangitmergedbranches='git branch --merged | grep -v develop | grep -v master | sed -e "s|  ||g" | while read ln; do git branch -d "$ln" ; done'
 alias glg='git log --date-order --all --graph --format="%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
 alias glg2='git log --date-order --all --graph --name-status --format="%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
-alias cleangitmergedbranches='git branch --merged | grep -v develop | grep -v master | sed -e "s|  ||g" | while read ln; do git branch -d "$ln" ; done'
-# hace pull desde el branch en el cual estoy parado, siempre desde origin
 gitpull () {
   BRANCH=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ \1/')
   git pull origin "$BRANCH"
 }
+# Fun
+alias weather-cba="curl http://wttr.in/cordoba"
+alias weather="curl http://wttr.in"
 
 # hace push al branch en el cual estoy parado, siempre en origin
 gitpush () {
@@ -77,6 +85,54 @@ gitpush () {
 #################
 ### FUNCTIONS ###
 #################
+upper () {
+  [ $# -ne 1  ] && echo "upper requires 1 argument" && return 1
+  check_installed tr
+  echo "$1" | tr '[:lower:]' '[:upper:]'
+}
+
+lower () {
+  [ $# -ne 1  ] && echo "lower requires 1 argument" && return 1
+  check_installed tr
+  echo "$1" | tr '[:upper:]' '[:lower:]'
+}
+### Plataform ###
+if_nix () {
+  [ $# -ne 1  ] && echo "if_nix requires 1 argument" && return 1
+
+  TARGETOS="$(upper $1)"
+
+  OS="UNKNOWN"
+  if [ -z "$OSTYPE" ]; then
+    # Detect the platform (alternative to $OSTYPE)
+    OS="$(uname)"
+    case $OS in
+      'AIX')        OS='AIX'          ;;
+      'Darwin')     OS='OSX'          ;;
+      'FreeBSD')    OS='BSD'          ;;
+      'Linux')      OS='LINUX'        ;;
+      'SunOS')      OS='SOLARIS'      ;;
+      'WindowsNT')  OS='WINDOWS'      ;;
+      *)            OS="UNKNOWN:$OS"  ;;
+    esac
+  else
+    case "$OSTYPE" in
+      bsd*)         OS='BSD'          ;;
+      darwin*)      OS='OSX'          ;; 
+      linux*)       OS='LINUX'        ;;
+      msys*)        OS='WINDOWS'      ;;
+      solaris*)     OS='SOLARIS'      ;;
+      *)            OS="UNKNOWN:$OS"  ;;
+    esac
+  fi
+
+  [ "$OS" == "$TARGETOS" ];
+}
+
+if_os_osx () { if_nix OSX; }
+if_os_linux () { if_nix LINUX; }
+if_os_windows () { if_nix WINDOWS; }
+
 ff () {
   find . -name "$@" -print;
 }
@@ -86,6 +142,7 @@ extract () {
     case "$1" in
       *.tar.bz2)   tar xvjf "$1"    ;;
       *.tar.gz)    tar xvzf "$1"    ;;
+      *.tar.*)     tar xf "$1"      ;;
       *.bz2)       bunzip2 "$1"     ;;
       *.rar)       unrar x "$1"     ;;
       *.gz)        gunzip "$1"      ;;
@@ -146,35 +203,64 @@ psgrep () {
   fi
 }
 
+pcdl () {
+  [ $# -ne 1  ] && echo "'pcdl' requires an url" && return 1
+  check_installed proxychains
+  proxychains sudo wget --continue "$1"
+}
+
 reloadEnv () {
+  unset add_param_to
+  unset allips
+  unset catecho
+  unset change_property_value_of
+  unset change_value_of
   unset check_groovy_proxy
   unset check_installed
   unset chownThisFolder
   unset coloredecho
   unset coloredprintf
   unset compress
+  unset disable_jvm_custom_timeouts
+  unset disable_jvm_dependency_logs
+  unset disable_jvm_plumbr_agent
   unset disable_proxy
+  unset enable_jvm_custom_timeouts
+  unset enable_jvm_dependency_logs
+  unset enable_jvm_plumbr_agent
   unset enable_proxy
   unset extract
   unset ff
+  unset getCellAt
   unset gitpull
   unset gitpush
   unset grails_opts
   unset grails_opts_clean
   unset grails_opts_test
   unset has_installed
+  unset history_search
+  unset host2ip
+  unset if_nix
+  unset if_os_linux
+  unset if_os_osx
+  unset if_os_windows
   unset ignore
   unset java_opts_clean
   unset java_opts_ivy_logger
   unset lls
   unset mypublicip
+  unset pcdl
   unset pidOnPort
   unset portcheck
   unset psgrep
   unset reloadEnv
+  unset remove_param_of
   unset serverOn
   unset setupcolor
+  unset show_grails_opts
+  unset string_sorter
   unset swapfiles
+  unset wheather
 
   clear
 
@@ -230,7 +316,6 @@ enable_proxy () {
 disable_proxy () {
   export https_proxy=""
   export http_proxy=""
-
 }
 
 chownThisFolder () {
@@ -241,40 +326,237 @@ chownThisFolder () {
   sudo chown -R "$USER:$(id -g -n $USER)" "$folder"
 }
 
+history_search () {
+  aterm="$1"
+  if [ -z "$aterm" ]; then
+    echo "'$aterm' is not a valid search" >&2; return 0
+  fi
+  history | grep "$aterm"
+}
+
+show_grails_opts () {
+  echo "✔ Set up for GRAILS_OPTS='$GRAILS_OPTS'"
+}
+
 grails_opts () {
   if [ -z "$1" ]; then
     echo "'$1' is not a valid config" >&2; return 0
   fi
 
-  GOPTS="-XX:PermSize=$1 -XX:MaxPermSize=$1 -Xmx$1 -Xms$1"
-  GOPTS="$GOPTS -XX:+UseParallelGC -XX:+UseParallelOldGC -server -noverify -Xshare:off -Djava.awt.headless=true"
-  GOPTS="$GOPTS -Djava.net.preferIPv4Stack=true -XX:+EliminateLocks -XX:+UseBiasedLocking"
-  export GRAILS_OPTS="$GOPTS"
+  GOPTS=""
+  #Heap and PermGen Sizing
+  add_param_to JAVA_OPTS "-Xmx$1"
+  add_param_to JAVA_OPTS "-Xms128M"
 
-  echo "✔ Set up for GRAILS_OPTS=$GRAILS_OPTS"
+  #Comment line below for java 8
+  #GOPTS="$GOPTS -XX:PermSize=1G -XX:MaxPermSize=1G"
+
+  # 1. Garbage collector configuration parallel
+  #GOPTS="$GOPTS -XX:+UseParallelGC -XX:+UseParallelOldGC"
+  # 2. Garbage collector configuration concurrent mark sweep
+
+  add_param_to JAVA_OPTS "-XX:+UseParNewGC"
+  add_param_to JAVA_OPTS "-XX:+UseConcMarkSweepGC"
+
+  change_property_value_of JAVA_OPTS -XX:MinHeapFreeRatio 50
+  change_property_value_of JAVA_OPTS -XX:MaxHeapFreeRatio 75
+  add_param_to JAVA_OPTS "-XX:+CMSPrecleaningEnabled"
+
+  #Comment line below for java 8
+  #GOPTS="$GOPTS -XX:+CMSPermGenPrecleaningEnabled"
+  add_param_to JAVA_OPTS "-XX:+CMSClassUnloadingEnabled"
+  add_param_to JAVA_OPTS "-XX:+UseCMSInitiatingOccupancyOnly"
+  change_property_value_of JAVA_OPTS -XX:CMSInitiatingOccupancyFraction 65
+
+  add_param_to JAVA_OPTS "-XX:+CMSParallelRemarkEnabled"
+  add_param_to JAVA_OPTS "-XX:+ScavengeBeforeFullGC"
+  add_param_to JAVA_OPTS "-XX:+CMSScavengeBeforeRemark"
+
+  change_property_value_of JAVA_OPTS -XX:NewRatio 8
+  change_property_value_of JAVA_OPTS -XX:SurvivorRatio 32
+
+  # Optimizations
+  change_property_value_of JAVA_OPTS -XX:MaxJavaStackTraceDepth 30
+  change_property_value_of JAVA_OPTS -XX:SoftRefLRUPolicyMSPerMB 10
+
+  add_param_to JAVA_OPTS '-XX:+EliminateLocks'
+  add_param_to JAVA_OPTS '-XX:+UseBiasedLocking'
+  add_param_to JAVA_OPTS '-Xshare:off'
+  add_param_to JAVA_OPTS '-server' 
+  add_param_to JAVA_OPTS '-noverify'
+  change_property_value_of JAVA_OPTS '-Djava.awt.headless' true 
+  change_property_value_of JAVA_OPTS '-Djava.net.preferIPv4Stack' true
+  change_property_value_of JAVA_OPTS '-Dgroovy.use.classvalue' true
+  #
+
 }
 
 grails_opts_clean () {
   export GRAILS_OPTS=""
-  echo "✔ Set up for GRAILS_OPTS=$GRAILS_OPTS"
+  show_grails_opts
 }
 
 java_opts_clean () {
   export JAVA_OPTS=""
-  echo "✔ Set up for JAVA_OPTS=$JAVA_OPTS"
+  echo "✔ Set up for JAVA_OPTS='$JAVA_OPTS'"
 }
 
 java_opts_ivy_logger () {
   export JAVA_OPTS="-Dgroovy.grape.report.downloads=true -Divy.message.logger.level=4"
-  echo "✔ Set up for JAVA_OPTS=$JAVA_OPTS"
+  echo "✔ Set up for JAVA_OPTS='$JAVA_OPTS'"
 }
 
 grails_opts_test () {
-  grails_opts "3G"
+  grails_opts "4G"
+}
+
+string_sorter () {
+
+  INPUT="$1"
+  [ -z "$INPUT" ] && INPUT=""
+  SEP="$2"
+  [ -z "$SEP" ] && SEP=","
+
+  echo "$INPUT" | tr "$SEP" "\n" | sort | uniq | tr "\n" "$SEP" | sed "s|$SEP$|\n|"
+}
+
+add_param_to () {
+  if [ -z "$1" ]; then
+    echo "'$1' variable name should be not null" >&2; return 0
+  fi
+
+  if [ -z "$2" ]; then
+    echo "'$2' param should be not null" >&2; return 0
+  fi
+
+  DLRSIGN='$'
+  VARNAME="$1"
+  PARAM="$2"
+
+  BEFORE=$( eval echo "$DLRSIGN$VARNAME" )
+  [ -z "$BEFORE" ] && export "$VARNAME"="" #Creates empty
+
+  AFTER=$( echo "$BEFORE $PARAM" | sed 's| \{1,\}| |g' )
+
+  AFTER=$( string_sorter "$AFTER" ' ' )
+  [ ! -z "$AFTER" ] && export "$VARNAME"="$AFTER"
+  
+  diff  <(echo "$BEFORE" ) <(echo "$AFTER")
+
+}
+
+remove_param_of () {
+  # removes params of type "$PARAM" "server"
+  if [ -z "$1" ]; then
+    echo "'$1' variable name should be not null" >&2; return 0
+  fi
+
+  if [ -z "$2" ]; then
+    echo "'$2' param should be not null" >&2; return 0
+  fi
+
+  DLRSIGN='$'
+  MINUSSIGN=''
+  VARNAME="$1"
+  PARAM="$2"
+
+  BEFORE=$( eval echo "$DLRSIGN$VARNAME" )
+  AFTER=$( echo "$BEFORE" | sed -e "s|$MINUSSIGN$PARAM||g" | sed 's| \{1,\}| |g' )
+
+  AFTER=$( string_sorter "$AFTER" ' ' )
+  [ ! -z "$BEFORE" ] && export "$VARNAME"="$AFTER"
+  diff  <(echo "$BEFORE" ) <(echo "$AFTER")
+}
+
+change_property_value_of () {
+  # Changes values of type "$KEY=$VALUE" i.e -XX:MinHeapFreeRatio=50
+  if [ -z "$1" ]; then
+    echo "'$1' variable name should be not null" >&2; return 0
+  fi
+
+  if [ -z "$2" ]; then
+    echo "'$2' key should be not null" >&2; return 0
+  fi
+
+  if [ -z "$3" ]; then
+    echo "'$3' value should be not null" >&2; return 0
+  fi
+
+  DLRSIGN='$'
+  VARNAME="$1"
+  KEY="$2"
+  VALUE="$3"
+
+  BEFORE=$( eval echo "$DLRSIGN$VARNAME" )
+  [ -z "$BEFORE" ] && export "$VARNAME"="" #Creates empty
+  AFTER=$( echo "$BEFORE $KEY=$VALUE" | sed -E "s|(\s*$KEY)=([a-zA-Z0-9\.]*)\s*|\1=$VALUE |g" | sed 's| \{1,\}| |g' )
+  AFTER=$( string_sorter "$AFTER" ' ' )
+  [ ! -z "$AFTER" ] && export "$VARNAME"="$AFTER"
+  diff  <(echo "$BEFORE" ) <(echo "$AFTER")
+
+}
+
+remove_property_value_of () {
+  # Changes values of type "$KEY=$VALUE" i.e -XX:MinHeapFreeRatio=50
+  if [ -z "$1" ]; then
+    echo "'$1' variable name should be not null" >&2; return 0
+  fi
+
+  if [ -z "$2" ]; then
+    echo "'$2' key should be not null" >&2; return 0
+  fi
+
+  DLRSIGN='$'
+  VARNAME="$1"
+  KEY="$2"
+
+  BEFORE=$( eval echo "$DLRSIGN$VARNAME" )
+  AFTER=$( echo "$BEFORE" | sed -E "s|(\s*$KEY)=([a-zA-Z0-9\.]*)\s*| |g" | sed 's| \{1,\}| |g' )
+  AFTER=$( string_sorter "$AFTER" ' ' )
+  [ ! -z "$BEFORE" ] && export "$VARNAME"="$AFTER"
+  diff  <(echo "$BEFORE" ) <(echo "$AFTER")
+
 }
 
 check_groovy_proxy () {
   groovy -Dhttp.proxyHost="$HTTP_PROXY_HOST" -Dhttp.proxyPort="$HTTP_PROXY_PORT" -Dhttps.proxyHost="$HTTPS_PROXY_HOST" -Dhttps.proxyPort="$HTTPS_PROXY_PORT"  -e 'try{ println "http://ifconfig.me/ip".toURL().text }catch(Exception e){ println "CHECK NETWORK|PROXY!" }'
+}
+
+enable_jvm_custom_timeouts() {
+  change_property_value_of JAVA_OPTS -Dsun.net.client.defaultConnectTimeout 500
+  change_property_value_of JAVA_OPTS -Dsun.net.client.defaultReadTimeout 2000
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+disable_jvm_custom_timeouts() {
+  remove_property_value_of JAVA_OPTS -Dsun.net.client.defaultConnectTimeout
+  remove_property_value_of JAVA_OPTS -Dsun.net.client.defaultReadTimeout
+
+}
+
+enable_jvm_plumbr_agent() {
+  PLUMBR_OPTS="-javaagent:$DEVTOOLS/PLUMBR_HOME/plumbr.jar"
+  export JAVA_OPTS="$JAVA_OPTS $PLUMBR_OPTS"
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+disable_jvm_plumbr_agent() {
+  PLUMBR_OPTS="-javaagent:path-to/plumbr.jar"
+  export JAVA_OPTS=$( echo $JAVA_OPTS | sed -e "s| $PLUMBR_OPTS||g"  )
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+enable_jvm_dependency_logs() {
+  change_property_value_of JAVA_OPTS -Dgroovy.grape.report.downloads true
+  change_property_value_of JAVA_OPTS -Divy.message.logger.level 4
+
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
+}
+
+disable_jvm_dependency_logs() {
+  remove_property_value_of JAVA_OPTS -Dgroovy.grape.report.downloads
+  remove_property_value_of JAVA_OPTS -Divy.message.logger.level
+  echo "\$JAVA_OPTS='$JAVA_OPTS'"
 }
 
 lls () {
@@ -285,6 +567,7 @@ lls () {
 
   echo "$( stat -c '%A (%a) %8s %.19y %n' $folder )"
 }
+
 #########
 #netinfo - shows network information for your system
 
@@ -292,7 +575,6 @@ mypublicip () {
   myip=$( dig +short myip.opendns.com @resolver1.opendns.com )
   echo "${myip}"
 }
-
 
 swapfiles () {
   # Swap 2 filenames around, if they exist (from Uzi's bashrc).
@@ -374,6 +656,51 @@ coloredecho () {
   echo "$(coloredprintf "$1" "$2" "$3")"
 }
 
+allips() {
+  ifconfig | awk '/inet / {sub(/addr:/, "", $2); print $2}'
+}
+
+host2ip() {
+  [ $# -ne 1  ] && echo "host2ip: 1 arguments needed" && return 1
+  [ -z "$1" ] && echo "host2ip: $1 does not exist" && return 1
+
+  if ( has_installed 'getent' ) && ( has_installed 'awk' ); then
+    echo "$( getent hosts "$1" | awk '{ print $1 }' )"
+  elif ( has_installed 'dig' ); then
+    echo "$( dig +short "$1" )"
+  fi
+
+}
+
+catecho () {
+    if [ $# -eq 0 ]; then
+        cat
+    else
+        echo "$*"
+    fi
+}
+
+wheather() {
+  aterm="$1"
+  if [ -z "$aterm" ]; then
+    curl 'wttr.in'
+  else
+    curl "wttr.in/$aterm"
+  fi
+}
+
+getCellAt() {
+
+  if [ "$#" -ne 2 ]; then
+    echo 'You need at least 2 params row column or file'
+    return 1      
+  fi
+
+  ROW="$1"
+  COL="$2"
+
+  catecho | awk "{print \$${COL}}" | sed "${ROW}q;d"
+}
 # enable color support of ls and also add handy aliases
 if has_installed "dircolors"; then
   if [ -r ~/.dircolors ] ; then

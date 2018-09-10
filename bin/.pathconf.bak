@@ -1,0 +1,74 @@
+#!/usr/bin/env sh
+cleanpath () {
+  if [ -n "$PATH" ]; then
+
+    OLD_PATH="$PATH"
+    NEO_PATH=""
+
+    echo "PATH=$PATH"
+    while [ -n "$OLD_PATH" ]; do
+      x="${OLD_PATH%%:*}"              # the first remaining entry
+      x=$(echo "$x" | sed 's:/*$::') # remove final '/'
+
+      if [ -z "$x" ] || [ "$x" = ' ' ]; then
+        OLD_PATH="${OLD_PATH#*:}"
+        continue;
+      elif [ -z "$NEO_PATH" -a "$x" != ' ' ]; then
+        NEO_PATH="$x"
+      elif ! echo "$NEO_PATH" | /bin/egrep -q "(^|:)$x($|:)" ; then
+        NEO_PATH="$NEO_PATH:$x"
+      fi
+
+      OLD_PATH=${OLD_PATH#*:}
+    done
+    PATH="$NEO_PATH"
+    export PATH
+
+    unset OLD_PATH x
+  fi
+}
+
+#addToPATH () {
+#  case ":$PATH:" in
+#    *":$1:"*) :;; # already there
+#    *) PATH="$1:$PATH";; # or PATH="$PATH:$1"
+#  esac
+#}
+
+
+addToPATH () {
+  if ! echo "$PATH" | /bin/egrep -q "(^|:)$1($|:)" ; then
+     if [ "$2" = "after" ] ; then
+        PATH=$PATH:$1
+        export PATH
+     else
+        PATH=$1:$PATH
+        export PATH
+     fi
+  fi
+}
+
+loadpaths () {
+  #Path configuration: directory based
+  if [ -f "$DVM_DIR/bin/.paths" ]; then
+      while read line
+      do
+          pathvar=$( eval echo $line )
+          if [ ! -d "$pathvar" ]; then
+            echo "$(coloredprintf '✖' FF0000 ) Please check '$pathvar'"
+            continue
+          fi
+          if [ -z "$pathvar" ]; then
+            # empty just continue
+            continue
+          fi
+          addToPATH "$pathvar" 'after'
+      done < "$DVM_DIR/bin/.paths"
+  fi
+}
+
+loadpaths
+cleanpath
+unset loadpaths
+# unset cleanpath
+echo "$(coloredprintf '✔' 00FF00) Path configuration [\$PATH related] "

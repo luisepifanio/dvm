@@ -1,46 +1,75 @@
 #!/usr/bin/env sh
 cleanpath () {
-  if [ -n "$PATH" ]; then
-    OLD_PATH=$PATH:; NEO_PATH=
-    while [ -n "$OLD_PATH" ]; do
-      x=${OLD_PATH%%:*}       # the first remaining entry
-      case $NEO_PATH: in
-        *:"$x":*) ;;         # already there
-        *)  if [ -n "$NEO_PATH" ]; then
-              NEO_PATH=$NEO_PATH:$x
+  local OLDPATH="$1:"
+
+  if [ -n "$OLDPATH" ]; then
+    local NEOPATH=""
+
+    while [ -n "$OLDPATH" ]; do
+      local x="${OLDPATH%%:*}"            # the first remaining entry
+
+      case "$NEOPATH": in
+        *:"$x":*) ;;                      # already there
+        "$x":*) ;;                      # already there
+        *)  if [ -n "$NEOPATH" ]; then
+              NEOPATH="$NEOPATH:$x"
             else
-              NEO_PATH=$x
+              NEOPATH="$x"
             fi;; # not there yet
       esac
-      OLD_PATH=${OLD_PATH#*:}
+
+      OLDPATH="${OLDPATH#*:}"
     done
-    PATH="$NEO_PATH"
-    unset OLD_PATH x
   fi
+
+  echo "$NEOPATH" | sed -e 's|::|:|g' -e 's|:$||g'
 }
 
 loadpaths () {
   #Path configuration: directory based
-  if [ -f "$DVM_DIR/bin/.paths" ]; then
-      while read line
-      do
-          pathvar=$( eval echo $line )
-          if [ ! -d "$pathvar" ]; then
-            echo "$(coloredprintf '✖' FF0000 ) Please check '$pathvar'"
-            continue
-          fi
 
-          if [ -z "${PATH##*$pathvar*}" ] ;then
-            printf ''
-          else
-            PATH="$pathvar:$PATH"
-          fi
-      done < $DVM_DIR/bin/.paths
+  local NEOPATH="$1"
+  if [ -f "$DVM_DIR/bin/.paths" ]; then
+    oldIFS=$IFS
+    IFS='
+'
+    for line in $(sed '1!G;h;$!d' "$DVM_DIR/bin/.paths")
+    do
+      local pathvar="$line"
+      #If line has variable '$' we evaluate it
+      #but not expression it could be harmful i.e $(rm -rf /)
+      if ( echo "$line" | grep -Eq '\$[a-zA-Z0-9]+' ) ; then
+        pathvar=$( eval echo "$line" )
+      fi
+
+      if [ ! -d "$pathvar" ] || ( echo "$pathvar" | grep -Eq '^#+' ) ; then
+        #echo "$(coloredprintf '✖' FF0000 ) Please check '$pathvar'"
+        continue
+      fi
+
+      if [ -z "${PATH##*$pathvar*}" ] ;then
+        #echo "$(coloredprintf '✖' FF0000 ) Already on path '$pathvar'"
+        continue
+      else
+        NEOPATH="$pathvar:$NEOPATH"
+      fi
+    done
+    IFS=$oldIFS
+    echo "$NEOPATH"
+
+    #sed '1!G;h;$!d' "$DVM_DIR/bin/.paths" | while read line; do
+    #done
+
+    #while read line
+    #do
+    #done < $DVM_DIR/bin/.paths
   fi
 }
 
-loadpaths
-cleanpath
+FIXEDPATH=$( loadpaths "$PATH" )
+FIXEDPATH=$( cleanpath "$FIXEDPATH" )
+PATH="$FIXEDPATH"
 unset loadpaths
 unset cleanpath
 echo "$(coloredprintf '✔' 00FF00) Path configuration [\$PATH related] "
+#echo "$PATH" | sed -e "s|:|\n|g"
