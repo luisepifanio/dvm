@@ -64,10 +64,10 @@ alias single_spaces="sed 's|\s\+| |g'"
 #####################
 ### SCM FUNCTIONS ###
 #####################
+# hace pull desde el branch en el cual estoy parado, siempre desde origin
+alias cleangitmergedbranches='git branch --merged | grep -v develop | grep -v master | sed -e "s|  ||g" | while read ln; do git branch -d "$ln" ; done'
 alias glg='git log --date-order --all --graph --format="%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
 alias glg2='git log --date-order --all --graph --name-status --format="%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
-alias cleangitmergedbranches='git branch --merged | grep -v develop | grep -v master | sed -e "s|  ||g" | while read ln; do git branch -d "$ln" ; done'
-# hace pull desde el branch en el cual estoy parado, siempre desde origin
 gitpull () {
   BRANCH=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ \1/')
   git pull origin "$BRANCH"
